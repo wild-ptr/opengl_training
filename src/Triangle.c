@@ -136,6 +136,18 @@ void drawTriangle()
         -0.5f,  0.5f, -0.5f,  0.0f, 1.0f
     };
 
+    vec3 cube_positions[] = {
+        { 0.0f,  0.0f,  0.0f},
+        { 2.0f,  5.0f, -15.0f},
+        {-1.5f, -2.2f, -2.5f},
+        {-3.8f, -2.0f, -12.3f},
+        { 2.4f, -0.4f, -3.5f},
+        {-1.7f,  3.0f, -7.5f},
+        { 1.3f, -2.0f, -2.5f},
+        { 1.5f,  2.0f, -2.5f},
+        { 1.5f,  0.2f, -1.5f},
+        {-1.3f,  1.0f, -1.5f}
+    };
 
     static bool once_flag = false;
     static RenderParameters render_params;
@@ -175,19 +187,36 @@ void drawTriangle()
     glBindVertexArray(render_params.vao);
     shader_setUniformf(&shader, "blendFactor", sin(glfwGetTime()) * 0.2f);
 
-    mat4 model_m = GLM_MAT4_IDENTITY_INIT;
-    glmc_rotate(model_m, glm_rad(-45.0f)*(float)glfwGetTime(), (vec3){1.0f, 1.0f, 0.0f});
+    for (int i = 0; i < 10; ++i)
+    {
+        // simple model transform
+        mat4 model_m = GLM_MAT4_IDENTITY_INIT;
+        glmc_translate(model_m, cube_positions[i]);
 
-    mat4 view_m = GLM_MAT4_IDENTITY_INIT;
-    glmc_translate(view_m, (vec3){0.0f, 0.0f, sin(glfwGetTime()) - 5.0f});
+        if(i%3 == 0)
+            glmc_rotate(model_m, glm_rad(-45.0f)*(float)glfwGetTime(), (vec3){1.0f, 1.0f, 0.0f});
+        else
+            glmc_rotate(model_m, glm_rad(15.0f * i), (vec3){1.0f, 0.0f, 0.0f});
 
-    mat4 proj_m = GLM_MAT4_IDENTITY_INIT;
-    glmc_perspective(glm_rad(45.0f), 1500.0f/1200.0f, 0.1f, 100.0f, proj_m);
+        // view transform on world space to view space
+        //glmc_translate(view_m, (vec3){0.0f, 0.0f, -5.0f});
+        //glmc_rotate(view_m, glm_rad(30.0f * sin(glfwGetTime())), (vec3){0.0f, 1.0f, 0.0f});
+        mat4 view_m = GLM_MAT4_IDENTITY_INIT;
+        const float radius = 10.0f;
+        float camX = sin(glfwGetTime()) * radius;
+        float camZ = cos(glfwGetTime()) * radius;
+        glmc_lookat((vec3){camX, 0.0f, camZ}, // camera position
+                    (vec3){0.0f, 0.0f, 0.0f}, // camera direction
+                    (vec3){0.0f, 1.0f, 0.0f}, // up vector in world space
+                    view_m);
 
-    shader_setUniform4mat(&shader, "model_m", &model_m);
-    shader_setUniform4mat(&shader, "view_m", &view_m);
-    shader_setUniform4mat(&shader, "proj_m", &proj_m);
-    glDrawArrays(GL_TRIANGLES, 0, 36);
-    //glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
-    // draw as friangles, from VBO position 0, use 6 vertices.
+        // perspective projection transform from view space to clip space
+        mat4 proj_m = GLM_MAT4_IDENTITY_INIT;
+        glmc_perspective(glm_rad(45.0f), 1500.0f/1200.0f, 0.1f, 100.0f, proj_m);
+
+        shader_setUniform4mat(&shader, "model_m", &model_m);
+        shader_setUniform4mat(&shader, "view_m", &view_m);
+        shader_setUniform4mat(&shader, "proj_m", &proj_m);
+        glDrawArrays(GL_TRIANGLES, 0, 36);
+    }
 }

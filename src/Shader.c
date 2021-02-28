@@ -76,36 +76,11 @@ bool shader_init(Shader* shader, const char* v_shader_path, const char* frag_sha
     char* v_shader_str = dumpFileContent(v_shader_path);
     char* frag_shader_str = dumpFileContent(frag_shader_path);
 
-    int v_shader = compileShader(v_shader_str, GL_VERTEX_SHADER);
-    int frag_shader = compileShader(frag_shader_str, GL_FRAGMENT_SHADER);
-
-    if ((v_shader == ERR_VALUE) || (frag_shader == ERR_VALUE))
-    {
-        ret = false;
-        shader->valid = false;
-        goto cleanup;
-    }
-
-    shader->id = glCreateProgram();
-    glAttachShader(shader->id, v_shader);
-    glAttachShader(shader->id, frag_shader);
-    glLinkProgram(shader->id);
-
-    if (!checkShaderLinkStatus(shader->id))
-    {
-        ret = false;
-        shader->valid = false;
-        goto cleanup;
-    }
-
-    ret = true;
-    shader->valid = true;
+    ret = shader_init_from_sources(shader, v_shader_str, frag_shader_str);
 
 cleanup:
     free(v_shader_str);
     free(frag_shader_str);
-    glDeleteShader(v_shader);
-    glDeleteShader(frag_shader);
     return ret;
 }
 
@@ -143,6 +118,18 @@ cleanup:
     return ret;
 }
 
+bool shader_init_with_f_and_data(Shader* shader,
+                              const char* v_shader_path,
+                              const char* frag_shader_path,
+                              uniform_calc_fp calculate_fun,
+                              void* calc_data)
+{
+    bool ret;
+    ret = shader_init(shader, v_shader_path, frag_shader_path);
+    shader->uniform_calc_fp = calculate_fun;
+    shader->uniform_calc_data = calc_data;
+}
+
 void shader_setUniform4f(Shader* shader, const char* name, Float4Vec vec4)
 {
     int uniform_loc = glGetUniformLocation(shader->id, name);
@@ -169,6 +156,17 @@ void shader_setUniform4mat(Shader* shader, const char* name, mat4* value)
     int uniform_loc = glGetUniformLocation(shader->id, name);
     glUseProgram(shader->id);
     glUniformMatrix4fv(uniform_loc,1, GL_FALSE, (float*)value);
+}
+
+void shader_update_uniform_calc_data(Shader* shader, void* uniform_calc_data)
+{
+    shader->uniform_calc_data = uniform_calc_data;
+    shader_calculate_uniforms(shader);
+}
+
+void shader_calculate_uniforms(Shader* shader)
+{
+    shader->uniform_calc_fp(shader, shader->uniform_calc_data);
 }
 
 void shader_use(Shader* shader)
