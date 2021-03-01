@@ -78,7 +78,6 @@ bool shader_init(Shader* shader, const char* v_shader_path, const char* frag_sha
 
     ret = shader_init_from_sources(shader, v_shader_str, frag_shader_str);
 
-cleanup:
     free(v_shader_str);
     free(frag_shader_str);
     return ret;
@@ -128,6 +127,7 @@ bool shader_init_with_f_and_data(Shader* shader,
     ret = shader_init(shader, v_shader_path, frag_shader_path);
     shader->uniform_calc_fp = calculate_fun;
     shader->uniform_calc_data = calc_data;
+    return ret;
 }
 
 void shader_setUniform4f(Shader* shader, const char* name, Float4Vec vec4)
@@ -166,7 +166,8 @@ void shader_update_uniform_calc_data(Shader* shader, void* uniform_calc_data)
 
 void shader_calculate_uniforms(Shader* shader)
 {
-    shader->uniform_calc_fp(shader, shader->uniform_calc_data);
+    if(shader->uniform_calc_fp != NULL)
+        shader->uniform_calc_fp(shader, shader->uniform_calc_data);
 }
 
 void shader_use(Shader* shader)

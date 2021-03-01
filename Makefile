@@ -21,8 +21,8 @@ OBJECTS = $(SOURCES:$(SRC_PATH)/%.$(SRC_EXT)=$(BUILD_PATH)/%.o)
 # Set the dependency files that will be used to add header dependencies
 DEPS = $(OBJECTS:.o=.d)
 
-# flags #
-COMPILE_FLAGS = -std=c11 -Wall -Wextra -g -O3 -flto -fopenmp -fuse-ld=gold
+# flags # add -flto later
+COMPILE_FLAGS = -std=gnu11 -Wall -Wextra -g -O3 -fopenmp -fuse-ld=gold
 INCLUDES = -I include/ -I /usr/local/include
 # Space-separated pkg-config libraries used by this project
 LIBS = lcglm 

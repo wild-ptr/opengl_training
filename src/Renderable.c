@@ -1,6 +1,7 @@
 #include "Renderable.h"
 #include <glad/glad.h>
 #include <assert.h>
+#include <string.h>
 
 // binds Vertex Buffer Object to array buffer of opengl.
 static int createAndBindVbo()
@@ -30,6 +31,7 @@ static unsigned int createAndBindEbo()
     unsigned int EBO;
     glGenBuffers(1, &EBO);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+    return EBO;
 }
 
 void renderable_create(Renderable* renderable,
@@ -39,18 +41,19 @@ void renderable_create(Renderable* renderable,
                        size_t indices_size,
                        Texture* textures,
                        size_t textures_size,
-                       Shader* shader,
+                       const Shader* shader,
                        Matrices* mvp_matrices)
 {
-    if (textures_size < 10)
+    renderable_init(renderable);
+    if (textures_size > 10)
     {
         printf("num_of_textures cannot be more than 10!\n");
         return;
     }
 
-    glBufferData(GL_ARRAY_BUFFER, vertices_size, vertices, GL_DYNAMIC_DRAW);
     renderable->VAO = createAndBindVao();
     renderable->VBO = createAndBindVbo();
+    glBufferData(GL_ARRAY_BUFFER, vertices_size, vertices, GL_DYNAMIC_DRAW);
 
     if(indices != NULL)
     {
@@ -65,13 +68,29 @@ void renderable_create(Renderable* renderable,
     glEnableVertexAttribArray(0); // vertex attributes are disabled by default.
     glEnableVertexAttribArray(1);
 
-    renderable->textures = textures;
+
     renderable->num_textures = textures_size;
     renderable->num_vertices = vertices_size;
-    renderable->shader = shader;
+
+    renderable->textures = malloc(sizeof(Texture) * textures_size);
+    memcpy(renderable->textures, textures, sizeof(Texture) * textures_size);
+
+    renderable->shader = malloc(sizeof(shader));
+    *renderable->shader = *shader;
+
     renderable->matrices = mvp_matrices;
 
     renderable->valid = true;
+}
+
+void renderable_free(Renderable* r)
+{
+    if(r->shader != NULL)
+        free(r->shader);
+    if(r->textures != NULL)
+        free(r->textures);
+
+    renderable_init(r); // set all to zero
 }
 
 void renderable_up_shader_uni_data(Renderable* renderable, void* uniform_calc_data)
@@ -91,11 +110,15 @@ void renderable_up_mvp_matrices(Renderable* renderable, Matrices* matrices)
 void renderable_draw(Renderable* renderable)
 {
     glBindVertexArray(renderable->VAO);
-    shader_use(renderable->shader);
+    glBindBuffer(GL_ARRAY_BUFFER, renderable->VBO); // possibly not needed.
+
     for(int i = 0; i < renderable->num_textures; ++i)
     {
         texture_use_texunit(&renderable->textures[i], GL_TEXTURE0 + i);
     }
+
+    shader_use(renderable->shader);
+    shader_calculate_uniforms(renderable->shader);
 
     if(renderable->indexed)
     {
@@ -105,7 +128,22 @@ void renderable_draw(Renderable* renderable)
     }
     else
     {
-        glDrawArrays(GL_TRIANGLES, 0, renderable->num_vertices);
+        glDrawArrays(GL_TRIANGLES, 0, renderable->num_vertices/(5*sizeof(float)));
         return;
     }
+}
+
+void renderable_init(Renderable* renderable)
+{
+    renderable->VAO = 0;
+    renderable->VBO = 0;
+    renderable->EBO = 0;
+    renderable->textures = NULL;
+    renderable->num_textures = 0;
+    renderable->num_indices = 0;
+    renderable->num_vertices = 0;
+    renderable->shader = NULL;
+    renderable->valid = false;
+    renderable->indexed = false;
+    renderable->matrices = NULL;
 }
