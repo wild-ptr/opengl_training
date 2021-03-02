@@ -3,7 +3,6 @@
 #include <cglm/call.h>
 #include <stdio.h>
 #include <stdlib.h>
-//#include "Triangle.h"
 #include "BoxScene.h"
 #include "Camera.h"
 
@@ -43,43 +42,18 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 
 void process_input(GLFWwindow* window, Camera* cam)
 {
-    // all of this belongs in the camera class,
-    // @TODO: process_input should have no fucking idea
-    // about how all this vector shit works, it should just
-    // moveForward(amount) instead of this.
-    // to move later.
-    float speed = cam->cam_speed;
+    float speed = cam->cam_speed * cam->time_d;
     if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
-    {
-        vec3 scaled;
-        glm_vec3_scale(cam->front_v, speed, scaled);
-        glm_vec3_add(cam->pos_v, scaled, cam->pos_v);
-    }
+        camera_move(cam, CAMERA_FORWARD);
 
     if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
-    {
-        vec3 scaled;
-        glm_vec3_scale(cam->front_v, speed, scaled);
-        glm_vec3_sub(cam->pos_v, scaled, cam->pos_v);
-    }
+        camera_move(cam, CAMERA_BACKWARD);
 
     if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
-    {
-        vec3 scaled;
-        glm_vec3_cross(cam->front_v, cam->up_v, scaled);
-        glm_normalize(scaled);
-        glm_vec3_scale(scaled, speed, scaled);
-        glm_vec3_sub(cam->pos_v, scaled, cam->pos_v);
-    }
+        camera_move(cam, CAMERA_LEFT);
 
     if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
-    {
-        vec3 scaled;
-        glm_vec3_cross(cam->front_v, cam->up_v, scaled);
-        glm_normalize(scaled);
-        glm_vec3_scale(scaled, speed, scaled);
-        glm_vec3_add(cam->pos_v, scaled, cam->pos_v);
-    }
+        camera_move(cam, CAMERA_RIGHT);
 }
 
 int main(void)
@@ -95,11 +69,16 @@ int main(void)
 
     Camera camera;
     camera_init(&camera);
-    camera.cam_speed = 0.2f;
+    camera_set_current(&camera);
+    camera.cam_speed = 1.0f;
     camera.pos_v[2] = 3.0f; // (0,0,3) position
-    camera.front_v[2] = -1.0f; // (0,0,-1) front
+    camera.dir_v[2] = -1.0f; // (0,0,-1) direction (opposite of where its looking)
     camera.up_v[1] = 1.0f; // (0,1,0) up v of world space;
+    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+    glfwSetCursorPosCallback(window, camera_move_direction_clbk);
 
+    float lastframe = 0;
+    float currentframe = 0;
     while(!glfwWindowShouldClose(window))
     {
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
@@ -110,6 +89,10 @@ int main(void)
 
         glfwSwapBuffers(window);
         glfwPollEvents();
+
+        currentframe = glfwGetTime();
+        camera.time_d = currentframe - lastframe;
+        lastframe = currentframe;
     }
 
     glfwTerminate();

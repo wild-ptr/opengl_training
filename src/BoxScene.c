@@ -90,7 +90,7 @@ static void calcUniforms(Shader* shader, void* raw_data)
     // view transform on world space to view space
     mat4 view_m = GLM_MAT4_IDENTITY_INIT;
     vec3 dir_v = {0};
-    glm_vec3_add(cam->pos_v, cam->front_v, dir_v);
+    glm_vec3_add(cam->pos_v, cam->dir_v, dir_v);
     glm_lookat(cam->pos_v,
                dir_v,
                cam->up_v,
