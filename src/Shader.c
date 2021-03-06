@@ -130,13 +130,6 @@ bool shader_init_with_f_and_data(Shader* shader,
     return ret;
 }
 
-void shader_setUniform4f(Shader* shader, const char* name, Float4Vec vec4)
-{
-    int uniform_loc = glGetUniformLocation(shader->id, name);
-    glUseProgram(shader->id);
-    glUniform4fv(uniform_loc, 4, (float*)&vec4);
-}
-
 void shader_setUniformf(Shader* shader, const char* name, float value)
 {
     int uniform_loc = glGetUniformLocation(shader->id, name);
@@ -157,6 +150,14 @@ void shader_setUniform4mat(Shader* shader, const char* name, mat4* value)
     glUseProgram(shader->id);
     glUniformMatrix4fv(uniform_loc,1, GL_FALSE, (float*)value);
 }
+
+void shader_setUniform3vec(Shader* shader, const char* name, float value[])
+{
+    int uniform_loc = glGetUniformLocation(shader->id, name);
+    glUseProgram(shader->id);
+    glUniform3fv(uniform_loc, 1, &value[0]);
+}
+
 
 void shader_update_uniform_calc_data(Shader* shader, void* uniform_calc_data)
 {

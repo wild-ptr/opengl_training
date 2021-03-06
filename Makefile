@@ -26,7 +26,7 @@ COMPILE_FLAGS = -std=gnu11 -Wall -Wextra -g -O3 -fopenmp -fuse-ld=gold
 INCLUDES = -I include/ -I /usr/local/include
 # Space-separated pkg-config libraries used by this project
 LIBS = lcglm 
-LINKER_FLAGS = -lpthread -lX11 -lglfw3 -lGL -lXrandr -lXi -ldl -lXinerama -lXcursor \
+LINKER_FLAGS = -lpthread -lX11 -lglfw -lGL -lXrandr -lXi -ldl -lXinerama -lXcursor \
 			   -lrt -lxcb -lXau -lXdmcp -lm -lcglm
 
 .PHONY: default_target

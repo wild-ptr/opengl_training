@@ -24,8 +24,9 @@ bool shader_init_with_f_and_data(Shader* shader,
 
 void shader_setUniformf(Shader*, const char* name, float value);
 void shader_setUniformi(Shader*, const char* name, int value);
-void shader_setUniform4f(Shader*, const char* name, Float4Vec value);
 void shader_setUniform4mat(Shader*, const char* name, mat4* value);
+void shader_setUniform3vec(Shader*, const char* name, float value[]);
+
 void shader_update_uniform_calc_data(Shader*, void* uniform_calc_data);
 void shader_calculate_uniforms(Shader*);
 void shader_use(Shader*);

@@ -60,8 +60,8 @@ static vec3 cube_positions[] = {
 typedef struct UniformData
 {
     vec3* position;
-    size_t box_number;
     Camera* camera;
+	vec3* scaleFactor;
 } UniformData;
 
 static void mvp_transform(Shader* shader, UniformData* data)
@@ -71,6 +71,7 @@ static void mvp_transform(Shader* shader, UniformData* data)
     // simple model transform
     mat4 model_m = GLM_MAT4_IDENTITY_INIT;
     glmc_translate(model_m, *data->position);
+	glmc_scale(model_m, *data->scaleFactor);
 
     // view transform on world space to view space
     mat4 view_m = GLM_MAT4_IDENTITY_INIT;
@@ -96,42 +97,92 @@ static void calcUniforms_forLightTarget(Shader* shader, void* raw_data)
     UniformData* data = raw_data;
     mvp_transform(shader, data);
 
-    shader_setUniformf(shader, "blendFactor", sin(glfwGetTime()));
+	static vec3 obj_col = {1.0f, 0.5f, 0.31f};
+	static vec3 light_col = {1.0f, 1.0f, 1.0f};
+	shader_setUniform3vec(shader, "objectColor", (vec3){0.3f, 0.0f, 0.6f});
+	shader_setUniform3vec(shader, "lightColor", light_col);
+}
+
+static void calcUniforms_forLightSource(Shader* shader, void* raw_data)
+{
+    UniformData* data = raw_data;
+    mvp_transform(shader, data);
+}
+
+Renderable create_light_target()
+{
+	Shader shader;
+    shader_init_with_f_and_data(&shader,
+                                "src/shaders/LightningVShader.glsl",
+                                "src/shaders/LightningFragShader.glsl",
+                                &calcUniforms_forLightTarget,
+                                NULL);
+
+	Renderable light_target;
+    renderable_create(&light_target,
+                      vertices,
+                      sizeof(vertices),
+                      NULL,
+                      0,
+                      NULL,
+                      0,
+                      &shader);
+
+
+	return light_target;
+}
+
+Renderable create_light_source()
+{
+	Shader shader;
+    shader_init_with_f_and_data(&shader,
+                                "src/shaders/LightningVShader.glsl",
+                                "src/shaders/LightSourceFShader.glsl",
+                                &calcUniforms_forLightSource,
+                                NULL);
+
+	Renderable light_source;
+    renderable_create(&light_source,
+                      vertices,
+                      sizeof(vertices),
+                      NULL,
+                      0,
+                      NULL,
+                      0,
+                      &shader);
+	return light_source;
 }
 
 void drawLightScene(Camera* camera)
 {
-    static Renderable box_scene;
+    static Renderable src;
+    static Renderable target;
 
-    Shader shader;
     static bool once_flag = false;
     if(!once_flag)
     {
-        shader_init_with_f_and_data(&shader,
-                                    "src/shaders/SimpleVShader.glsl",
-                                    "src/shaders/SimpleFragShader.glsl",
-                                    &calcUniforms_forLightTarget,
-                                    NULL);
-
-        renderable_create(&box_scene,
-                          vertices,
-                          sizeof(vertices),
-                          NULL,
-                          0,
-                          NULL,
-                          0,
-                          &shader);
-        once_flag = true;
-     }
-
-    UniformData data;
-    data.camera = camera;
-
-    for(int i = 0; i < 2; ++i)
-    {
-        data.box_number = i;
-        data.position = &cube_positions[i];
-        renderable_up_shader_uni_data(&box_scene, &data);
-        renderable_draw(&box_scene);
+		src = create_light_source();
+		target = create_light_target();
+		once_flag = true;
     }
+
+    UniformData data_src;
+	UniformData data_target;
+
+    data_src.camera = camera;
+	data_target.camera = camera;
+
+	data_src.position = &cube_positions[0];
+	data_target.position = &cube_positions[1];
+
+	vec3 scale_f_src = {0.5, 0.5, 0.5};
+	vec3 scale_f_target = {1.5, 1.5, 1.5};
+	data_src.scaleFactor = &scale_f_src;
+	data_target.scaleFactor = &scale_f_target;
+
+    renderable_up_shader_uni_data(&src, &data_src);
+    renderable_up_shader_uni_data(&target, &data_target);
+
+    renderable_draw(&src);
+    renderable_draw(&target);
 }
