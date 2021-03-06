@@ -72,7 +72,7 @@ int main(void)
     camera_init(&camera);
     camera_set_current(&camera);
     camera.cam_speed = 0.5f;
-    camera.pos_v[2] = 3.0f; // (0,0,3) position
+    camera.pos_v[2] = 5.0f; // (0,0,3) position
     camera.dir_v[2] = -1.0f; // (0,0,-1) direction (opposite of where its looking)
     camera.up_v[1] = 1.0f; // (0,1,0) up v of world space;
     glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);

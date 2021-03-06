@@ -175,7 +175,7 @@ void shader_use(Shader* shader)
 {
     if(!shader->valid)
     {
-        printf("Trying to use invalid shader.\n");
+        //printf("Trying to use invalid shader.\n");
         return;
     }
     glUseProgram(shader->id);
