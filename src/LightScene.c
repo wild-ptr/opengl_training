@@ -54,15 +54,7 @@ static float vertices[] =
 
 static vec3 cube_positions[] = {
     { 0.0f,  0.0f,  0.0f},
-    { 2.0f,  5.0f, -15.0f},
     {-1.5f, -2.2f, -2.5f},
-    {-3.8f, -2.0f, -12.3f},
-    { 2.4f, -0.4f, -3.5f},
-    {-1.7f,  3.0f, -7.5f},
-    { 1.3f, -2.0f, -2.5f},
-    { 1.5f,  2.0f, -2.5f},
-    { 1.5f,  0.2f, -1.5f},
-    {-1.3f,  1.0f, -1.5f}
 };
 
 typedef struct UniformData
@@ -72,20 +64,13 @@ typedef struct UniformData
     Camera* camera;
 } UniformData;
 
-static void calcUniforms(Shader* shader, void* raw_data)
+static void mvp_transform(Shader* shader, UniformData* data)
 {
-    UniformData* data = raw_data;
     Camera* cam = data->camera;
-    int i = data->box_number;
 
     // simple model transform
     mat4 model_m = GLM_MAT4_IDENTITY_INIT;
     glmc_translate(model_m, *data->position);
-
-    if(i%3 == 0)
-        glmc_rotate(model_m, glm_rad(-45.0f)*(float)glfwGetTime(), (vec3){1.0f, 1.0f, 0.0f});
-    else
-        glmc_rotate(model_m, glm_rad(15.0f * i), (vec3){1.0f, 0.0f, 0.0f});
 
     // view transform on world space to view space
     mat4 view_m = GLM_MAT4_IDENTITY_INIT;
@@ -104,29 +89,28 @@ static void calcUniforms(Shader* shader, void* raw_data)
     shader_setUniform4mat(shader, "model_m", &model_m);
     shader_setUniform4mat(shader, "view_m", &view_m);
     shader_setUniform4mat(shader, "proj_m", &proj_m);
-
-    shader_setUniformf(shader, "blendFactor", sin(glfwGetTime()));
-
-    shader_setUniformi(shader, "usedTexture", 0);
-    shader_setUniformi(shader, "usedTexture2", 1);
 }
 
-void drawBoxScene(Camera* camera)
+static void calcUniforms_forLightTarget(Shader* shader, void* raw_data)
+{
+    UniformData* data = raw_data;
+    mvp_transform(shader, data);
+
+    shader_setUniformf(shader, "blendFactor", sin(glfwGetTime()));
+}
+
+void drawLightScene(Camera* camera)
 {
     static Renderable box_scene;
 
-    Texture textures[2];
     Shader shader;
     static bool once_flag = false;
     if(!once_flag)
     {
-        texture_init_rgb(&textures[0], "assets/container.jpg", GL_RGB);
-        texture_init_rgb(&textures[1], "assets/awesomeface.png", GL_RGBA);
-
         shader_init_with_f_and_data(&shader,
                                     "src/shaders/SimpleVShader.glsl",
                                     "src/shaders/SimpleFragShader.glsl",
-                                    &calcUniforms,
+                                    &calcUniforms_forLightTarget,
                                     NULL);
 
         renderable_create(&box_scene,
@@ -134,8 +118,8 @@ void drawBoxScene(Camera* camera)
                           sizeof(vertices),
                           NULL,
                           0,
-                          textures,
-                          2,
+                          NULL,
+                          0,
                           &shader);
         once_flag = true;
      }
@@ -143,7 +127,7 @@ void drawBoxScene(Camera* camera)
     UniformData data;
     data.camera = camera;
 
-    for(int i = 0; i < 10; ++i)
+    for(int i = 0; i < 2; ++i)
     {
         data.box_number = i;
         data.position = &cube_positions[i];

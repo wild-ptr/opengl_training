@@ -3,13 +3,6 @@
 #include "Shader.h"
 #include "Texture.h"
 
-typedef struct Matrices
-{
-    mat4 model_m;
-    mat4 view_m;
-    mat4 proj_m;
-} Matrices;
-
 typedef struct Renderable
 {
     unsigned int VAO;
@@ -22,7 +15,6 @@ typedef struct Renderable
     Shader* shader;
     bool valid;
     bool indexed;
-    Matrices* matrices;
 } Renderable;
 
 
@@ -35,12 +27,13 @@ void renderable_create(Renderable* renderable,
                        size_t indices_size,
                        Texture textures[], // deep copied
                        size_t textures_size,
-                       const Shader* shader, // deep copied
-                       Matrices* mvp_matrices);
+                       const Shader* shader); // deep copied
 
 void renderable_draw(Renderable* renderable);
 
 void renderable_up_shader_uni_data(Renderable* renderable,
                                    void* uniform_calc_data);
+
+void renderable_bind(Renderable*);
 
 void renderable_free(Renderable*);

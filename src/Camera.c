@@ -60,28 +60,25 @@ void camera_init(Camera* cam)
 
 void camera_move(Camera* cam, enum CameraDirections dir)
 {
-    vec3 scaled;
+    vec3 scaled = {0.0f, 0.0f, 0.0f};
+
     switch(dir)
     {
         case CAMERA_FORWARD:
-            memset(scaled, 0, sizeof(vec3));
             glm_vec3_scale(cam->dir_v, cam->cam_speed, scaled);
             glm_vec3_add(cam->pos_v, scaled, cam->pos_v);
             break;
         case CAMERA_BACKWARD:
-            memset(scaled, 0, sizeof(vec3));
             glm_vec3_scale(cam->dir_v, cam->cam_speed, scaled);
             glm_vec3_sub(cam->pos_v, scaled, cam->pos_v);
             break;
         case CAMERA_LEFT:
-            memset(scaled, 0, sizeof(vec3));
             glm_vec3_cross(cam->dir_v, cam->up_v, scaled);
             glm_normalize(scaled);
             glm_vec3_scale(scaled, cam->cam_speed, scaled);
             glm_vec3_sub(cam->pos_v, scaled, cam->pos_v);
             break;
         case CAMERA_RIGHT:
-            memset(scaled, 0, sizeof(vec3));
             glm_vec3_cross(cam->dir_v, cam->up_v, scaled);
             glm_normalize(scaled);
             glm_vec3_scale(scaled, cam->cam_speed, scaled);

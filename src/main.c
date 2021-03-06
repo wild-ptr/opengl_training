@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "BoxScene.h"
+#include "LightScene.h"
 #include "Camera.h"
 
 GLFWwindow* create_window(void)
@@ -37,7 +38,7 @@ void initialize_glfw(void)
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 {
-    glViewport(0,0, width, height);
+    glViewport(0, 0, width, height);
 }
 
 void process_input(GLFWwindow* window, Camera* cam)
@@ -70,7 +71,7 @@ int main(void)
     Camera camera;
     camera_init(&camera);
     camera_set_current(&camera);
-    camera.cam_speed = 1.0f;
+    camera.cam_speed = 0.5f;
     camera.pos_v[2] = 3.0f; // (0,0,3) position
     camera.dir_v[2] = -1.0f; // (0,0,-1) direction (opposite of where its looking)
     camera.up_v[1] = 1.0f; // (0,1,0) up v of world space;
@@ -85,7 +86,8 @@ int main(void)
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         process_input(window, &camera);
 
-        drawBoxScene(&camera);
+        //drawBoxScene(&camera);
+        drawLightScene(&camera);
 
         glfwSwapBuffers(window);
         glfwPollEvents();

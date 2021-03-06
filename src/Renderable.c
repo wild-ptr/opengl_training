@@ -34,6 +34,15 @@ static unsigned int createAndBindEbo()
     return EBO;
 }
 
+void renderable_bind(Renderable* r)
+{
+    if(r->valid)
+    {
+        glBindVertexArray(r->VAO);
+        if(r->EBO) glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, r->EBO);
+    }
+}
+
 void renderable_create(Renderable* renderable,
                        float vertices[static 1],
                        size_t vertices_size,
@@ -41,8 +50,7 @@ void renderable_create(Renderable* renderable,
                        size_t indices_size,
                        Texture* textures,
                        size_t textures_size,
-                       const Shader* shader,
-                       Matrices* mvp_matrices)
+                       const Shader* shader)
 {
     renderable_init(renderable);
     if (textures_size > 10)
@@ -72,13 +80,14 @@ void renderable_create(Renderable* renderable,
     renderable->num_textures = textures_size;
     renderable->num_vertices = vertices_size;
 
-    renderable->textures = malloc(sizeof(Texture) * textures_size);
-    memcpy(renderable->textures, textures, sizeof(Texture) * textures_size);
+    if(textures_size)
+    {
+        renderable->textures = malloc(sizeof(Texture) * textures_size);
+        memcpy(renderable->textures, textures, sizeof(Texture) * textures_size);
+    }
 
     renderable->shader = malloc(sizeof(shader));
     *renderable->shader = *shader;
-
-    renderable->matrices = mvp_matrices;
 
     renderable->valid = true;
 }
@@ -96,15 +105,6 @@ void renderable_free(Renderable* r)
 void renderable_up_shader_uni_data(Renderable* renderable, void* uniform_calc_data)
 {
     renderable->shader->uniform_calc_data = uniform_calc_data;
-}
-
-// dont use, use shader for this.
-void renderable_up_mvp_matrices(Renderable* renderable, Matrices* matrices)
-{
-    renderable->matrices = matrices;
-    shader_setUniform4mat(renderable->shader, "model_m", &matrices->model_m);
-    shader_setUniform4mat(renderable->shader, "view_m", &matrices->view_m);
-    shader_setUniform4mat(renderable->shader, "proj_m", &matrices->proj_m);
 }
 
 void renderable_draw(Renderable* renderable)
@@ -145,5 +145,4 @@ void renderable_init(Renderable* renderable)
     renderable->shader = NULL;
     renderable->valid = false;
     renderable->indexed = false;
-    renderable->matrices = NULL;
 }

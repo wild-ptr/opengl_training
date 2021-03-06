@@ -3,7 +3,7 @@
 
 typedef struct Texture
 {
-    int id;
+    unsigned int id;
     bool valid;
 } Texture;
 

@@ -26,7 +26,7 @@ bool texture_init_rgb(Texture* tex, const char* path, unsigned int texture_type)
 
     // first zero is mipmap level, we generate base texture, so 0.
     // second zero parameter is legacy and should always be set to zero.
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0,
+    glTexImage2D(GL_TEXTURE_2D, 0, texture_type, width, height, 0,
                  texture_type, GL_UNSIGNED_BYTE, data);
     glGenerateMipmap(GL_TEXTURE_2D);
 
@@ -54,7 +54,6 @@ void texture_use_texunit(Texture* tex, unsigned int active_texture)
         printf("Trying to use invalid texture.\n");
         return;
     }
-
-    glActiveTexture(active_texture);
     glBindTexture(GL_TEXTURE_2D, tex->id);
+    glActiveTexture(active_texture);
 }

@@ -8,7 +8,7 @@ typedef struct Camera
     vec3 pos_v;
     vec3 dir_v;
     vec3 up_v;
-    float time_d;
+    float time_d; // @TODO: camera shouldnt know about time delta.
     float cam_speed;
     float sensitivity;
     float last_x;
@@ -26,7 +26,7 @@ enum CameraDirections
 };
 
 void camera_init(Camera*);
-void camera_move(Camera*, enum CameraDirections);
+void camera_move(Camera*, enum CameraDirections); // this will need an interface change
+void camera_move_direction_clbk(GLFWwindow*, double, double);
 
 void camera_set_current(Camera*);
-void camera_move_direction_clbk(GLFWwindow*, double, double);
