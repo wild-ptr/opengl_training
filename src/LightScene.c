@@ -6,6 +6,7 @@
 #include <cglm/call.h>
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
+#include <string.h>
 
 static float vertices[] = {
     -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
@@ -56,22 +57,30 @@ static vec3 cube_positions[] = {
     {-1.5f, -2.2f, -2.5f},
 };
 
+static vec3 lightPosition; // this is ugly dont do this
+
 typedef struct UniformData
 {
-    vec3* position;
+    vec3 position;
     Camera* camera;
 	vec3* scaleFactor;
 } UniformData;
 
-static void mvp_transform(Shader* shader, UniformData* data)
+static void mvp_transform(Shader* shader, const UniformData* data)
 {
     Camera* cam = data->camera;
 
     // simple model transform
     mat4 model_m = GLM_MAT4_IDENTITY_INIT;
-    glmc_translate(model_m, *data->position);
+    glmc_translate(model_m, data->position);
 	glmc_scale(model_m, *data->scaleFactor);
     glmc_rotate(model_m, glfwGetTime(), (vec3){1.0f, 0.0f, 0.0f});
+
+    // normal transform matrix
+    mat3 norm_m;
+    glmc_mat4_pick3(model_m, norm_m);
+    glmc_mat3_transpose(norm_m);
+    glmc_mat3_inv(norm_m, norm_m);
 
     // view transform on world space to view space
     mat4 view_m = GLM_MAT4_IDENTITY_INIT;
@@ -90,16 +99,18 @@ static void mvp_transform(Shader* shader, UniformData* data)
     shader_setUniform4mat(shader, "model_m", &model_m);
     shader_setUniform4mat(shader, "view_m", &view_m);
     shader_setUniform4mat(shader, "proj_m", &proj_m);
+    shader_setUniform3mat(shader, "norm_m", &norm_m);
 }
 
 static void calcUniforms_forLightTarget(Shader* shader, void* raw_data)
 {
-    UniformData* data = raw_data;
+    const UniformData* data = raw_data;
     mvp_transform(shader, data);
 
 	shader_setUniform3vec(shader, "objectColor", (vec3){1.0f, 0.5f, 0.31f});
 	shader_setUniform3vec(shader, "lightColor", (vec3){1.0f, 1.0f, 1.0f});
-    shader_setUniform3vec(shader, "lightPos", (vec3){0.0f,  0.0f,  0.0f});
+    //shader_setUniform3vec(shader, "lightPos", (vec3){0.0f,  0.0f,  0.0f});
+    shader_setUniform3vec(shader, "lightPos", lightPosition);
     shader_setUniform3vec(shader, "viewPos", data->camera->pos_v);
 }
 
@@ -182,8 +193,12 @@ void drawLightScene(Camera* camera)
     data_src.camera = camera;
 	data_target.camera = camera;
 
-	data_src.position = &cube_positions[0];
-	data_target.position = &cube_positions[1];
+    const float radius = 3.0f;
+    const float camX = sin(glfwGetTime()) * radius;
+    const float camZ = cos(glfwGetTime()) * radius;
+    memcpy(lightPosition, (vec3){camX, 0.0f, camZ}, sizeof(vec3));
+	memcpy(data_src.position, lightPosition, sizeof(vec3));
+    memcpy(data_target.position, &cube_positions[0], sizeof(vec3));
 
 	vec3 scale_f_src = {0.5, 0.5, 0.5};
 	vec3 scale_f_target = {1.5, 1.5, 1.5};

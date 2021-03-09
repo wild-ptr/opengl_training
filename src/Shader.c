@@ -151,6 +151,13 @@ void shader_setUniform4mat(Shader* shader, const char* name, mat4* value)
     glUniformMatrix4fv(uniform_loc,1, GL_FALSE, (float*)value);
 }
 
+void shader_setUniform3mat(Shader* shader, const char* name, mat3* value)
+{
+    int uniform_loc = glGetUniformLocation(shader->id, name);
+    glUseProgram(shader->id);
+    glUniformMatrix3fv(uniform_loc,1, GL_FALSE, (float*)value);
+}
+
 void shader_setUniform3vec(Shader* shader, const char* name, float value[])
 {
     int uniform_loc = glGetUniformLocation(shader->id, name);
