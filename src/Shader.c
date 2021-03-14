@@ -3,7 +3,10 @@
 #include <stdbool.h>
 #include <limits.h>
 #include <glad/glad.h>
+#include <string.h>
+#include <assert.h>
 #include "Shader.h"
+#include "Light.h"
 
 
 static const int ERR_VALUE = INT_MAX;
@@ -158,7 +161,7 @@ void shader_setUniform3mat(Shader* shader, const char* name, mat3* value)
     glUniformMatrix3fv(uniform_loc,1, GL_FALSE, (float*)value);
 }
 
-void shader_setUniform3vec(Shader* shader, const char* name, float value[])
+void shader_setUniform3vec(Shader* shader, const char* name, const float value[])
 {
     int uniform_loc = glGetUniformLocation(shader->id, name);
     glUseProgram(shader->id);
@@ -187,3 +190,52 @@ void shader_use(Shader* shader)
     }
     glUseProgram(shader->id);
 }
+
+// What about many light sources.
+// This is not scallable and needs some array-setting functions for arrays of Lights
+// But will have to do for now.
+void shader_set_light(Shader* shader, const Light* light, const char* uniform_name)
+{
+    assert(strlen(uniform_name) < 50);
+    char buf[80];
+
+    strcpy(buf, uniform_name);
+    strcat(buf, ".position");
+    shader_setUniform3vec(shader, buf, light->position);
+
+    strcpy(buf, uniform_name);
+    strcat(buf, ".ambient");
+    shader_setUniform3vec(shader, buf, light->ambient);
+
+    strcpy(buf, uniform_name);
+    strcat(buf, ".diffuse");
+    shader_setUniform3vec(shader, buf, light->diffuse);
+
+    strcpy(buf, uniform_name);
+    strcat(buf, ".specular");
+    shader_setUniform3vec(shader, buf, light->specular);
+}
+
+// @TODO implement Material and this function i guess.
+void shader_set_material(Shader* shader, const Material* material, const char* uniform_name)
+{
+    assert(strlen(uniform_name) < 50);
+    char buf[80];
+
+    strcpy(buf, uniform_name);
+    strcat(buf, ".ambient");
+    shader_setUniform3vec(shader, buf, material->ambient);
+
+    strcpy(buf, uniform_name);
+    strcat(buf, ".diffuse");
+    shader_setUniform3vec(shader, buf, material->diffuse);
+
+    strcpy(buf, uniform_name);
+    strcat(buf, ".specular");
+    shader_setUniform3vec(shader, buf, material->specular);
+
+    strcpy(buf, uniform_name);
+    strcat(buf, ".shininess");
+    shader_setUniformf(shader, buf, material->shininess);
+}
+

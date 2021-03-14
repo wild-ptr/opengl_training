@@ -57,7 +57,13 @@ static vec3 cube_positions[] = {
     {-1.5f, -2.2f, -2.5f},
 };
 
-static vec3 lightPosition; // this is ugly dont do this
+
+static Light light = {
+    .ambient = {0.1, 0.1, 0.1},
+    .diffuse = {0.5, 0.5, 0.5},
+    .specular = {0.5, 0.5, 0.5}
+    // . position uninitialized
+};
 
 typedef struct UniformData
 {
@@ -107,16 +113,28 @@ static void calcUniforms_forLightTarget(Shader* shader, void* raw_data)
     const UniformData* data = raw_data;
     mvp_transform(shader, data);
 
-	shader_setUniform3vec(shader, "objectColor", (vec3){1.0f, 0.5f, 0.31f});
-	shader_setUniform3vec(shader, "lightColor", (vec3){1.0f, 1.0f, 1.0f});
-    //shader_setUniform3vec(shader, "lightPos", (vec3){0.0f,  0.0f,  0.0f});
-    shader_setUniform3vec(shader, "lightPos", lightPosition);
+    Material cube_material = {
+        .ambient = {1.0f, 0.5f, 0.31f},
+        .diffuse = {1.0f, 0.5f, 0.31f},
+        .specular = {0.5f, 0.5, 0.5f},
+        .shininess = 32.0f
+    };
+
+
     shader_setUniform3vec(shader, "viewPos", data->camera->pos_v);
+    shader_set_light(shader, &light, "light");
+    shader_set_material(shader, &cube_material, "material");
 }
 
 static void calcUniforms_forLightSource(Shader* shader, void* raw_data)
 {
     UniformData* data = raw_data;
+    Material cube_material = {
+        .shininess = 32.0f
+    };
+    memcpy(cube_material.diffuse, light.diffuse, sizeof(vec3));
+    shader_set_material(shader, &cube_material, "cubeMaterial");
+
     mvp_transform(shader, data);
 }
 static void set_vertex_attributes()
@@ -196,9 +214,13 @@ void drawLightScene(Camera* camera)
     const float radius = 3.0f;
     const float camX = sin(glfwGetTime()) * radius;
     const float camZ = cos(glfwGetTime()) * radius;
-    memcpy(lightPosition, (vec3){camX, 0.0f, camZ}, sizeof(vec3));
-	memcpy(data_src.position, lightPosition, sizeof(vec3));
+
+    memcpy(light.position, (vec3){camX, 0.0f, camZ}, sizeof(vec3));
+	memcpy(data_src.position, light.position, sizeof(vec3));
     memcpy(data_target.position, &cube_positions[0], sizeof(vec3));
+
+    vec3 light_diffuse = {camX, 1.0f, camZ};
+    memcpy(light.diffuse, light_diffuse, sizeof(vec3));
 
 	vec3 scale_f_src = {0.5, 0.5, 0.5};
 	vec3 scale_f_target = {1.5, 1.5, 1.5};
