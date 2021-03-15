@@ -114,6 +114,7 @@ void renderable_draw(Renderable* renderable)
 
     for(int i = 0; i < renderable->num_textures; ++i)
     {
+        printf("this should not be happenin\n");
         texture_use_texunit(&renderable->textures[i], GL_TEXTURE0 + i);
     }
 

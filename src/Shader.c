@@ -216,26 +216,24 @@ void shader_set_light(Shader* shader, const Light* light, const char* uniform_na
     shader_setUniform3vec(shader, buf, light->specular);
 }
 
-// @TODO implement Material and this function i guess.
+// @TODO hardcoded texture has to change to something more flexible,
+// refactor Renderable to accept Materials from now on.
 void shader_set_material(Shader* shader, const Material* material, const char* uniform_name)
 {
     assert(strlen(uniform_name) < 50);
     char buf[80];
 
     strcpy(buf, uniform_name);
-    strcat(buf, ".ambient");
-    shader_setUniform3vec(shader, buf, material->ambient);
-
-    strcpy(buf, uniform_name);
     strcat(buf, ".diffuse");
-    shader_setUniform3vec(shader, buf, material->diffuse);
+    texture_use_texunit(&material->diffuse_map, GL_TEXTURE0);
+    shader_setUniformi(shader, buf, 0);
 
     strcpy(buf, uniform_name);
     strcat(buf, ".specular");
-    shader_setUniform3vec(shader, buf, material->specular);
+    texture_use_texunit(&material->specular_map, GL_TEXTURE1);
+    shader_setUniformi(shader, buf, 1);
 
     strcpy(buf, uniform_name);
     strcat(buf, ".shininess");
     shader_setUniformf(shader, buf, material->shininess);
 }
-

@@ -7,49 +7,52 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #include <string.h>
+#include "Utilities.h"
 
-static float vertices[] = {
-    -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
-     0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
-     0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
-     0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
-    -0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
-    -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
 
-    -0.5f, -0.5f,  0.5f,  0.0f,  0.0f, 1.0f,
-     0.5f, -0.5f,  0.5f,  0.0f,  0.0f, 1.0f,
-     0.5f,  0.5f,  0.5f,  0.0f,  0.0f, 1.0f,
-     0.5f,  0.5f,  0.5f,  0.0f,  0.0f, 1.0f,
-    -0.5f,  0.5f,  0.5f,  0.0f,  0.0f, 1.0f,
-    -0.5f, -0.5f,  0.5f,  0.0f,  0.0f, 1.0f,
+float vertices[] = {
+    // positions          // normals           // texture coords
+    -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f, 0.0f,
+     0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f, 0.0f,
+     0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f, 1.0f,
+     0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f, 1.0f,
+    -0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f, 1.0f,
+    -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f, 0.0f,
 
-    -0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,
-    -0.5f,  0.5f, -0.5f, -1.0f,  0.0f,  0.0f,
-    -0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,
-    -0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,
-    -0.5f, -0.5f,  0.5f, -1.0f,  0.0f,  0.0f,
-    -0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,
+    -0.5f, -0.5f,  0.5f,  0.0f,  0.0f, 1.0f,   0.0f, 0.0f,
+     0.5f, -0.5f,  0.5f,  0.0f,  0.0f, 1.0f,   1.0f, 0.0f,
+     0.5f,  0.5f,  0.5f,  0.0f,  0.0f, 1.0f,   1.0f, 1.0f,
+     0.5f,  0.5f,  0.5f,  0.0f,  0.0f, 1.0f,   1.0f, 1.0f,
+    -0.5f,  0.5f,  0.5f,  0.0f,  0.0f, 1.0f,   0.0f, 1.0f,
+    -0.5f, -0.5f,  0.5f,  0.0f,  0.0f, 1.0f,   0.0f, 0.0f,
 
-     0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,
-     0.5f,  0.5f, -0.5f,  1.0f,  0.0f,  0.0f,
-     0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,
-     0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,
-     0.5f, -0.5f,  0.5f,  1.0f,  0.0f,  0.0f,
-     0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,
+    -0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,  1.0f, 0.0f,
+    -0.5f,  0.5f, -0.5f, -1.0f,  0.0f,  0.0f,  1.0f, 1.0f,
+    -0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,  0.0f, 1.0f,
+    -0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,  0.0f, 1.0f,
+    -0.5f, -0.5f,  0.5f, -1.0f,  0.0f,  0.0f,  0.0f, 0.0f,
+    -0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,  1.0f, 0.0f,
 
-    -0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,
-     0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,
-     0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,
-     0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,
-    -0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,
-    -0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,
+     0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,  1.0f, 0.0f,
+     0.5f,  0.5f, -0.5f,  1.0f,  0.0f,  0.0f,  1.0f, 1.0f,
+     0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,  0.0f, 1.0f,
+     0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,  0.0f, 1.0f,
+     0.5f, -0.5f,  0.5f,  1.0f,  0.0f,  0.0f,  0.0f, 0.0f,
+     0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,  1.0f, 0.0f,
 
-    -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,
-     0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,
-     0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,
-     0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,
-    -0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,
-    -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f
+    -0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,  0.0f, 1.0f,
+     0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,  1.0f, 1.0f,
+     0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,  1.0f, 0.0f,
+     0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,  1.0f, 0.0f,
+    -0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,  0.0f, 0.0f,
+    -0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,  0.0f, 1.0f,
+
+    -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  0.0f, 1.0f,
+     0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  1.0f, 1.0f,
+     0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  1.0f, 0.0f,
+     0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  1.0f, 0.0f,
+    -0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  0.0f, 0.0f,
+    -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  0.0f, 1.0f
 };
 
 static vec3 cube_positions[] = {
@@ -59,8 +62,8 @@ static vec3 cube_positions[] = {
 
 
 static Light light = {
-    .ambient = {0.1, 0.1, 0.1},
-    .diffuse = {0.5, 0.5, 0.5},
+    .ambient = {0.15, 0.15, 0.15},
+    .diffuse = {0.6, 0.6, 0.6},
     .specular = {0.5, 0.5, 0.5}
     // . position uninitialized
 };
@@ -113,36 +116,54 @@ static void calcUniforms_forLightTarget(Shader* shader, void* raw_data)
     const UniformData* data = raw_data;
     mvp_transform(shader, data);
 
-    Material cube_material = {
-        .ambient = {1.0f, 0.5f, 0.31f},
-        .diffuse = {1.0f, 0.5f, 0.31f},
-        .specular = {0.5f, 0.5, 0.5f},
-        .shininess = 32.0f
+    static Material cube_material = {
+        .shininess = 32.0f,
     };
+
+    CALL_ONCE
+    {
+        material_init(&cube_material,
+                      "assets/container2.png", GL_RGBA,
+                      "assets/container2_specular.png", GL_RGBA);
+        //material_init(&cube_material,
+        //              "assets/container2_specular.png", GL_RGBA,
+        //              "assets/container2.png", GL_RGBA);
+        shader_set_material(shader, &cube_material, "material");
+        CALL_ONCE_END;
+    }
 
 
     shader_setUniform3vec(shader, "viewPos", data->camera->pos_v);
     shader_set_light(shader, &light, "light");
-    shader_set_material(shader, &cube_material, "material");
 }
+
 
 static void calcUniforms_forLightSource(Shader* shader, void* raw_data)
 {
     UniformData* data = raw_data;
-    Material cube_material = {
-        .shininess = 32.0f
-    };
-    memcpy(cube_material.diffuse, light.diffuse, sizeof(vec3));
+    static Material cube_material;
+
+    CALL_ONCE
+    {
+        material_init(&cube_material,
+                      "assets/container2.png", GL_RGBA,
+                      "assets/container2_specular.png", GL_RGBA);
+        CALL_ONCE_END;
+    }
+
     shader_set_material(shader, &cube_material, "cubeMaterial");
 
     mvp_transform(shader, data);
 }
+
 static void set_vertex_attributes()
 {
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6*sizeof(float), (void*)0);
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6*sizeof(float), (void*)(3*sizeof(float)));
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8*sizeof(float), (void*)0);
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8*sizeof(float), (void*)(3*sizeof(float)));
+    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8*sizeof(float), (void*)(6*sizeof(float)));
     glEnableVertexAttribArray(0);
     glEnableVertexAttribArray(1);
+    glEnableVertexAttribArray(2);
 }
 
 static Renderable create_light_target()
@@ -197,12 +218,11 @@ void drawLightScene(Camera* camera)
     static Renderable src;
     static Renderable target;
 
-    static bool once_flag = false;
-    if(!once_flag)
+    CALL_ONCE
     {
 		src = create_light_source();
 		target = create_light_target();
-		once_flag = true;
+        CALL_ONCE_END;
     }
 
     UniformData data_src;
@@ -216,11 +236,12 @@ void drawLightScene(Camera* camera)
     const float camZ = cos(glfwGetTime()) * radius;
 
     memcpy(light.position, (vec3){camX, 0.0f, camZ}, sizeof(vec3));
+    memcpy(light.position, (vec3){3.0f, 1.0f, 3.0f}, sizeof(vec3));
 	memcpy(data_src.position, light.position, sizeof(vec3));
     memcpy(data_target.position, &cube_positions[0], sizeof(vec3));
 
-    vec3 light_diffuse = {camX, 1.0f, camZ};
-    memcpy(light.diffuse, light_diffuse, sizeof(vec3));
+    //vec3 light_diffuse = {camX, 1.0f, camZ};
+    //memcpy(light.diffuse, light_diffuse, sizeof(vec3));
 
 	vec3 scale_f_src = {0.5, 0.5, 0.5};
 	vec3 scale_f_target = {1.5, 1.5, 1.5};

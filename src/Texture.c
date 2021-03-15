@@ -47,13 +47,13 @@ void texture_use(Texture* tex)
     glBindTexture(GL_TEXTURE_2D, tex->id);
 }
 
-void texture_use_texunit(Texture* tex, unsigned int active_texture)
+void texture_use_texunit(const Texture* tex, unsigned int active_texture)
 {
     if(!tex->valid)
     {
         printf("Trying to use invalid texture.\n");
         return;
     }
-    glBindTexture(GL_TEXTURE_2D, tex->id);
     glActiveTexture(active_texture);
+    glBindTexture(GL_TEXTURE_2D, tex->id);
 }
