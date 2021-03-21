@@ -34,4 +34,6 @@ void shader_update_uniform_calc_data(Shader*, void* uniform_calc_data);
 void shader_calculate_uniforms(Shader*);
 void shader_use(Shader*);
 void shader_set_light(Shader*, const Light*, const char* name);
-void shader_set_material(Shader* shader, const Material* material, const char* uniform_name);
+
+// should shader know about material? I guess they are linked in many ways, so why not?
+void shader_set_material(Shader* shader, const Material* material, const char* uniform_name, int offset);

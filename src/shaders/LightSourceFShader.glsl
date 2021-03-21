@@ -14,5 +14,5 @@ uniform Material cubeMaterial;
 
 void main()
 {
-	FragColor = vec4(cubeMaterial.diffuse, 1.0);
+	FragColor = vec4(1.0);
 }

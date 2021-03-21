@@ -1,6 +1,7 @@
 #include "Texture.h"
 #include "stb_image.h"
 #include <glad/glad.h>
+#include <stdbool.h>
 
 bool texture_init_rgb(Texture* tex, const char* path, unsigned int texture_type)
 {
@@ -51,9 +52,14 @@ void texture_use_texunit(const Texture* tex, unsigned int active_texture)
 {
     if(!tex->valid)
     {
-        printf("Trying to use invalid texture.\n");
         return;
     }
     glActiveTexture(active_texture);
     glBindTexture(GL_TEXTURE_2D, tex->id);
+}
+
+Texture* texture_zero_init(Texture* tex)
+{
+    tex->id = 0;
+    tex->valid = false;
 }

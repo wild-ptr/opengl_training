@@ -83,7 +83,7 @@ static void mvp_transform(Shader* shader, const UniformData* data)
     mat4 model_m = GLM_MAT4_IDENTITY_INIT;
     glmc_translate(model_m, data->position);
 	glmc_scale(model_m, *data->scaleFactor);
-    glmc_rotate(model_m, glfwGetTime(), (vec3){1.0f, 0.0f, 0.0f});
+    //glmc_rotate(model_m, glfwGetTime(), (vec3){1.0f, 0.0f, 0.0f});
 
     // normal transform matrix
     mat3 norm_m;
@@ -116,23 +116,6 @@ static void calcUniforms_forLightTarget(Shader* shader, void* raw_data)
     const UniformData* data = raw_data;
     mvp_transform(shader, data);
 
-    static Material cube_material = {
-        .shininess = 32.0f,
-    };
-
-    CALL_ONCE
-    {
-        material_init(&cube_material,
-                      "assets/container2.png", GL_RGBA,
-                      "assets/container2_specular.png", GL_RGBA);
-        //material_init(&cube_material,
-        //              "assets/container2_specular.png", GL_RGBA,
-        //              "assets/container2.png", GL_RGBA);
-        shader_set_material(shader, &cube_material, "material");
-        CALL_ONCE_END;
-    }
-
-
     shader_setUniform3vec(shader, "viewPos", data->camera->pos_v);
     shader_set_light(shader, &light, "light");
 }
@@ -142,16 +125,6 @@ static void calcUniforms_forLightSource(Shader* shader, void* raw_data)
 {
     UniformData* data = raw_data;
     static Material cube_material;
-
-    CALL_ONCE
-    {
-        material_init(&cube_material,
-                      "assets/container2.png", GL_RGBA,
-                      "assets/container2_specular.png", GL_RGBA);
-        CALL_ONCE_END;
-    }
-
-    shader_set_material(shader, &cube_material, "cubeMaterial");
 
     mvp_transform(shader, data);
 }
@@ -175,14 +148,20 @@ static Renderable create_light_target()
                                 &calcUniforms_forLightTarget,
                                 NULL);
 
+    Material cube_material = { .shininess = 32.0f };
+    material_init(&cube_material,
+                  "assets/container2.png", GL_RGBA,
+                  "assets/container2_specular.png", GL_RGBA,
+                  NULL, 0);
+
 	Renderable light_target;
     renderable_create(&light_target,
                       vertices,
                       sizeof(vertices),
                       NULL,
                       0,
-                      NULL,
-                      0,
+                      &cube_material,
+                      1,
                       &shader);
 
     set_vertex_attributes();
@@ -236,7 +215,6 @@ void drawLightScene(Camera* camera)
     const float camZ = cos(glfwGetTime()) * radius;
 
     memcpy(light.position, (vec3){camX, 0.0f, camZ}, sizeof(vec3));
-    memcpy(light.position, (vec3){3.0f, 1.0f, 3.0f}, sizeof(vec3));
 	memcpy(data_src.position, light.position, sizeof(vec3));
     memcpy(data_target.position, &cube_positions[0], sizeof(vec3));
 

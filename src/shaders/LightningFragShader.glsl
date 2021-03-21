@@ -9,6 +9,7 @@ struct Material
 {
     sampler2D diffuse;
     sampler2D specular;
+    sampler2D normal;
     float shininess;
 };
 
@@ -20,14 +21,14 @@ struct Light
     vec3 position;
 };
 
-uniform Material material;
+uniform Material material_0;
 uniform Light light;
 uniform vec3 viewPos;
 
 void main()
 {
-    vec3 diffuseColor = vec3(texture(material.diffuse, texCoords));
-    vec3 specularFactor = vec3(texture(material.specular, texCoords));
+    vec3 diffuseColor = vec3(texture(material_0.diffuse, texCoords));
+    vec3 specularFactor = vec3(texture(material_0.specular, texCoords));
     // ambient component
     vec3 ambientLight = diffuseColor * light.ambient;
     
@@ -45,8 +46,9 @@ void main()
     // points towards the cube, we need to negate vector before reflect.
     vec3 reflect_dir = reflect(-light_dir, norm_n);
 
-    float spec = pow(max(dot(view_dir, reflect_dir), 0.0), material.shininess);
+    float spec = pow(max(dot(view_dir, reflect_dir), 0.0), material_0.shininess);
     vec3 specularLight = spec * specularFactor * light.specular;
 
 	FragColor = vec4((ambientLight + diffuseLight + specularLight), 1.0f);
+	//FragColor = vec4((diffuseColor), 1.0f);
 }

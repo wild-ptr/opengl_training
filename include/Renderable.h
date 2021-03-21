@@ -1,15 +1,15 @@
 #pragma once
 #include <stdbool.h>
 #include "Shader.h"
-#include "Texture.h"
+#include "Material.h"
 
 typedef struct Renderable
 {
     unsigned int VAO;
     unsigned int VBO;
     unsigned int EBO;
-    Texture* textures;
-    int num_textures;
+    Material* materials;
+    int num_materials;
     int num_indices;
     int num_vertices;
     Shader* shader;
@@ -25,8 +25,8 @@ void renderable_create(Renderable* renderable,
                        size_t vertices_size,
                        unsigned int indices[],
                        size_t indices_size,
-                       Texture textures[], // deep copied
-                       size_t textures_size,
+                       Material materials[], // deep copied
+                       size_t materials_size,
                        const Shader* shader); // deep copied
 
 void renderable_draw(Renderable* renderable);

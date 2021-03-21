@@ -2,6 +2,7 @@
 #include <glad/glad.h>
 #include <assert.h>
 #include <string.h>
+#include <stdlib.h>
 
 // binds Vertex Buffer Object to array buffer of opengl.
 static int createAndBindVbo()
@@ -48,14 +49,14 @@ void renderable_create(Renderable* renderable,
                        size_t vertices_size,
                        unsigned int indices[],
                        size_t indices_size,
-                       Texture* textures,
-                       size_t textures_size,
+                       Material* materials,
+                       size_t materials_size,
                        const Shader* shader)
 {
     renderable_init(renderable);
-    if (textures_size > 10)
+    if (materials_size > 10)
     {
-        printf("num_of_textures cannot be more than 10!\n");
+        printf("num_of_materials cannot be more than 10!\n");
         return;
     }
 
@@ -77,13 +78,13 @@ void renderable_create(Renderable* renderable,
     glEnableVertexAttribArray(1);
 
 
-    renderable->num_textures = textures_size;
+    renderable->num_materials = materials_size;
     renderable->num_vertices = vertices_size;
 
-    if(textures_size)
+    if(materials_size)
     {
-        renderable->textures = malloc(sizeof(Texture) * textures_size);
-        memcpy(renderable->textures, textures, sizeof(Texture) * textures_size);
+        renderable->materials = malloc(sizeof(Material) * materials_size);
+        memcpy(renderable->materials, materials, sizeof(Material) * materials_size);
     }
 
     renderable->shader = malloc(sizeof(shader));
@@ -96,8 +97,8 @@ void renderable_free(Renderable* r)
 {
     if(r->shader != NULL)
         free(r->shader);
-    if(r->textures != NULL)
-        free(r->textures);
+    if(r->materials != NULL)
+        free(r->materials);
 
     renderable_init(r); // set all to zero
 }
@@ -112,10 +113,14 @@ void renderable_draw(Renderable* renderable)
     glBindVertexArray(renderable->VAO);
     glBindBuffer(GL_ARRAY_BUFFER, renderable->VBO); // possibly not needed.
 
-    for(int i = 0; i < renderable->num_textures; ++i)
+    for(int i = 0; i < renderable->num_materials; ++i)
     {
-        printf("this should not be happenin\n");
-        texture_use_texunit(&renderable->textures[i], GL_TEXTURE0 + i);
+        char buf[70];
+        char num[10];
+        strcpy(buf, "material_");
+        sprintf(num,"%d", i);
+        strcat(buf, num);
+        shader_set_material(renderable->shader, &renderable->materials[i], buf, i*3);
     }
 
     shader_use(renderable->shader);
@@ -123,7 +128,6 @@ void renderable_draw(Renderable* renderable)
 
     if(renderable->indexed)
     {
-        //glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, renderable->EBO); // VAO should handle this.
         glDrawElements(GL_TRIANGLES, renderable->num_indices, GL_UNSIGNED_INT, 0);
         return;
     }
@@ -139,8 +143,8 @@ void renderable_init(Renderable* renderable)
     renderable->VAO = 0;
     renderable->VBO = 0;
     renderable->EBO = 0;
-    renderable->textures = NULL;
-    renderable->num_textures = 0;
+    renderable->materials = NULL;
+    renderable->num_materials = 0;
     renderable->num_indices = 0;
     renderable->num_vertices = 0;
     renderable->shader = NULL;
