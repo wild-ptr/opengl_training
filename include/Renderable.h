@@ -3,6 +3,11 @@
 #include "Shader.h"
 #include "Material.h"
 
+// I believe this should become an opaque object in the future.
+// There is no point for user to touch any of that.
+
+typedef void(*renderable_bind_attributes_fp)(void);
+
 typedef struct Renderable
 {
     unsigned int VAO;
@@ -21,6 +26,7 @@ typedef struct Renderable
 void renderable_init(Renderable* renderable);
 
 void renderable_create(Renderable* renderable,
+                       renderable_bind_attributes_fp bind_fp,
                        float vertices[static 1],
                        size_t vertices_size,
                        unsigned int indices[],

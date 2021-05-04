@@ -36,4 +36,4 @@ void shader_use(Shader*);
 void shader_set_light(Shader*, const Light*, const char* name);
 
 // should shader know about material? I guess they are linked in many ways, so why not?
-void shader_set_material(Shader* shader, const Material* material, const char* uniform_name, int offset);
+//void shader_set_material(Shader* shader, const Material* material, const char* uniform_name, int offset);

@@ -168,7 +168,6 @@ void shader_setUniform3vec(Shader* shader, const char* name, const float value[]
     glUniform3fv(uniform_loc, 1, &value[0]);
 }
 
-
 void shader_update_uniform_calc_data(Shader* shader, void* uniform_calc_data)
 {
     shader->uniform_calc_data = uniform_calc_data;

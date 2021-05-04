@@ -45,6 +45,7 @@ void renderable_bind(Renderable* r)
 }
 
 void renderable_create(Renderable* renderable,
+                       renderable_bind_attributes_fp bind_fp,
                        float vertices[static 1],
                        size_t vertices_size,
                        unsigned int indices[],
@@ -72,11 +73,10 @@ void renderable_create(Renderable* renderable,
         renderable->num_indices = indices_size;
     }
 
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5*sizeof(float), (void*)0);
-    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5*sizeof(float), (void*)(3*sizeof(float)));
-    glEnableVertexAttribArray(0); // vertex attributes are disabled by default.
-    glEnableVertexAttribArray(1);
-
+    if(bind_fp != NULL)
+        bind_fp();
+    else
+        printf("Warning! No attribute pointers are set for renderable.\n");
 
     renderable->num_materials = materials_size;
     renderable->num_vertices = vertices_size;

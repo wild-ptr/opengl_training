@@ -10,7 +10,7 @@
 #include "Utilities.h"
 
 
-float vertices[] = {
+static float vertices[] = {
     // positions          // normals           // texture coords
     -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f, 0.0f,
      0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f, 0.0f,
@@ -83,7 +83,7 @@ static void mvp_transform(Shader* shader, const UniformData* data)
     mat4 model_m = GLM_MAT4_IDENTITY_INIT;
     glmc_translate(model_m, data->position);
 	glmc_scale(model_m, *data->scaleFactor);
-    //glmc_rotate(model_m, glfwGetTime(), (vec3){1.0f, 0.0f, 0.0f});
+    glmc_rotate(model_m, glfwGetTime(), (vec3){1.0f, 0.0f, 0.0f});
 
     // normal transform matrix
     mat3 norm_m;
@@ -118,6 +118,7 @@ static void calcUniforms_forLightTarget(Shader* shader, void* raw_data)
 
     shader_setUniform3vec(shader, "viewPos", data->camera->pos_v);
     shader_set_light(shader, &light, "light");
+    shader_setUniformf(shader, "time", glfwGetTime());
 }
 
 
@@ -148,23 +149,35 @@ static Renderable create_light_target()
                                 &calcUniforms_forLightTarget,
                                 NULL);
 
-    Material cube_material = { .shininess = 32.0f };
-    material_init(&cube_material,
-                  "assets/container2.png", GL_RGBA,
+    Material cube_materials[2] = {
+        { .shininess = 32.0f },
+        { .shininess = 32.0f }
+    };
+
+    //material_init(&cube_material,
+    //              "assets/container2.png", GL_RGBA,
+    //              "assets/container2_specular.png", GL_RGBA,
+    //              "assets/normal_bricks.jpg", GL_RGB);
+    material_init(&cube_materials[0],
+                  "assets/bricks.jpg", GL_RGB,
                   "assets/container2_specular.png", GL_RGBA,
-                  NULL, 0);
+                  "assets/normal_bricks.jpg", GL_RGB);
+
+    material_init(&cube_materials[1],
+                  "assets/matrix.jpg", GL_RGB,
+                  NULL, GL_RGBA,
+                  NULL, GL_RGB);
 
 	Renderable light_target;
     renderable_create(&light_target,
+                      set_vertex_attributes,
                       vertices,
                       sizeof(vertices),
                       NULL,
                       0,
-                      &cube_material,
-                      1,
+                      cube_materials,
+                      2,
                       &shader);
-
-    set_vertex_attributes();
 
 	return light_target;
 }
@@ -180,6 +193,7 @@ static Renderable create_light_source()
 
 	Renderable light_source;
     renderable_create(&light_source,
+                      set_vertex_attributes,
                       vertices,
                       sizeof(vertices),
                       NULL,

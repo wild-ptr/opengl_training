@@ -22,22 +22,37 @@ struct Light
 };
 
 uniform Material material_0;
+uniform Material material_1;
 uniform Light light;
 uniform vec3 viewPos;
+uniform float time;
 
 void main()
 {
     vec3 diffuseColor = vec3(texture(material_0.diffuse, texCoords));
     vec3 specularFactor = vec3(texture(material_0.specular, texCoords));
+    vec3 normalMap = vec3(texture(material_0.normal, texCoords));
+
+
+    // emission map
+    vec3 emissionColor = vec3(0.0);
+    if (specularFactor == vec3(0.0))
+    {
+        emissionColor = vec3(texture(material_1.diffuse, texCoords + vec2(0.0, time)));
+        emissionColor *= 0.5;
+    }
+
     // ambient component
     vec3 ambientLight = diffuseColor * light.ambient;
     
     // diffuse component
     vec3 norm_n = normalize(Norm);
+    //vec3 norm_n = normalize(normalMap);
+    //norm_n = (norm_n * 2.0) - 1.0;
     vec3 light_dir = normalize(light.position - FragPosViewS);
 
     // seems that max is usual with dot product to clamp it to 0.0
-    vec3 diffuseLight = max(dot(Norm, light_dir), 0.0) * light.diffuse * diffuseColor;
+    vec3 diffuseLight = max(dot(norm_n, light_dir), 0.0) * light.diffuse * diffuseColor;
 
     // specular component
     // so we get the view direction vector.
@@ -49,6 +64,5 @@ void main()
     float spec = pow(max(dot(view_dir, reflect_dir), 0.0), material_0.shininess);
     vec3 specularLight = spec * specularFactor * light.specular;
 
-	FragColor = vec4((ambientLight + diffuseLight + specularLight), 1.0f);
-	//FragColor = vec4((diffuseColor), 1.0f);
+	FragColor = vec4((ambientLight + diffuseLight + specularLight + emissionColor), 1.0f);
 }

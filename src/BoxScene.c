@@ -111,6 +111,14 @@ static void calcUniforms(Shader* shader, void* raw_data)
     shader_setUniformi(shader, "usedTexture2", 1);
 }
 
+static void setVertexAttributes()
+{
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5*sizeof(float), (void*)0);
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5*sizeof(float), (void*)(3*sizeof(float)));
+    glEnableVertexAttribArray(0); // vertex attributes are disabled by default.
+    glEnableVertexAttribArray(1);
+}
+
 void drawBoxScene(Camera* camera)
 {
     static Renderable box_scene;
@@ -130,6 +138,7 @@ void drawBoxScene(Camera* camera)
                                     NULL);
 
         renderable_create(&box_scene,
+                          setVertexAttributes,
                           vertices,
                           sizeof(vertices),
                           NULL,
