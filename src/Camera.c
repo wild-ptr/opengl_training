@@ -8,7 +8,7 @@ void camera_move_direction_clbk(GLFWwindow* window, double xpos, double ypos)
     static bool first_mouse_input = false;
     Camera* cam = current_camera;
 
-    if (first_mouse_input)
+    if (!first_mouse_input)
     {
         cam->last_x = xpos;
         cam->last_y = ypos;
@@ -26,6 +26,7 @@ void camera_move_direction_clbk(GLFWwindow* window, double xpos, double ypos)
     cam->yaw += xoffset;
     cam->pitch += yoffset;
 
+    // camera pitch clamp to <-89, 89>
     if(cam->pitch > 89.0f)
         cam->pitch = 89.0f;
     if(cam->pitch < -89.0f)

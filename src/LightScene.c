@@ -154,10 +154,6 @@ static Renderable create_light_target()
         { .shininess = 32.0f }
     };
 
-    //material_init(&cube_material,
-    //              "assets/container2.png", GL_RGBA,
-    //              "assets/container2_specular.png", GL_RGBA,
-    //              "assets/normal_bricks.jpg", GL_RGB);
     material_init(&cube_materials[0],
                   "assets/bricks.jpg", GL_RGB,
                   "assets/container2_specular.png", GL_RGBA,

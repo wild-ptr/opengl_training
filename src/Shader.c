@@ -220,20 +220,29 @@ void shader_set_material(Shader* shader, const Material* material, const char* u
     assert(strlen(uniform_name) < 50);
     char buf[80];
 
-    strcpy(buf, uniform_name);
-    strcat(buf, ".diffuse");
-    texture_use_texunit(&material->diffuse_map, GL_TEXTURE0 + offset);
-    shader_setUniformi(shader, buf, 0 + offset);
+    if(material->diffuse_map.valid)
+    {
+        strcpy(buf, uniform_name);
+        strcat(buf, ".diffuse");
+        texture_use_texunit(&material->diffuse_map, GL_TEXTURE0 + offset);
+        shader_setUniformi(shader, buf, 0 + offset);
+    }
 
-    strcpy(buf, uniform_name);
-    strcat(buf, ".specular");
-    texture_use_texunit(&material->specular_map, GL_TEXTURE1 + offset);
-    shader_setUniformi(shader, buf, 1 + offset);
+    if(material->specular_map.valid)
+    {
+        strcpy(buf, uniform_name);
+        strcat(buf, ".specular");
+        texture_use_texunit(&material->specular_map, GL_TEXTURE1 + offset);
+        shader_setUniformi(shader, buf, 1 + offset);
+    }
 
-    strcpy(buf, uniform_name);
-    strcat(buf, ".normal");
-    texture_use_texunit(&material->normal_map, GL_TEXTURE2 + offset);
-    shader_setUniformi(shader, buf, 2 + offset);
+    if(material->specular_map.valid)
+    {
+        strcpy(buf, uniform_name);
+        strcat(buf, ".normal");
+        texture_use_texunit(&material->normal_map, GL_TEXTURE2 + offset);
+        shader_setUniformi(shader, buf, 2 + offset);
+    }
 
     strcpy(buf, uniform_name);
     strcat(buf, ".shininess");
