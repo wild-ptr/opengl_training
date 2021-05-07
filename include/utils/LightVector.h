@@ -12,6 +12,7 @@
 #define LV_FOR_EACH(vec, index) \
     for(size_t (index) = 0; (index) < (vec).size; ++(index))
 
+// can this even work?
 #define LV_INIT_PUSH(vec, LightType, initializer)                           \
 do                                                                          \
 {                                                                           \

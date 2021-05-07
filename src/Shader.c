@@ -353,26 +353,27 @@ void shader_set_lights(Shader* shader, const LightVector* vec)
         void* light = LV_AT(*vec, i);
         enum ELightType type = light_get_type(light);
 
-        // small visitor-type dispatch
+        // Almost like std::visit! Almost.
         if(type == LIGHT_UNIDIR)
         {
-            LightDirectional* dirlight = light;
             set_directional_light(shader, light, dir_lights_index++);
             continue;
         }
         if(type == LIGHT_OMNIDIR)
         {
-            Light* dirlight = light;
             set_omni_light(shader, light, omni_lights_index++);
             continue;
         }
         if(type == LIGHT_SPOTLIGHT)
         {
-            LightSpotlight* spotlight = light;
             set_spot_light(shader, light, spotlight_lights_index++);
             continue;
         }
     }
+
+    shader_setUniformi(shader, "dirLightsSize" , dir_lights_index);
+    shader_setUniformi(shader, "omniLightsSize" , omni_lights_index);
+    shader_setUniformi(shader, "spotLightsSize" , spotlight_lights_index);
 }
 
 #undef SHADER_INTERNAL_ITOA

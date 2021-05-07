@@ -76,10 +76,9 @@ bool lv_remove(LightVector* vec, size_t index)
         return true;
     }
 
-    else // reallocate elements to maintain continuity.
+    else // front-middle removal, reallocate elements to maintain vector continuity.
     {
-        free(vec->data[index]);
-        //vec->data[index] = NULL;
+        free(vec->data[index]); // data[index] will be overwritten, no need to NULL it.
 
         size_t begin_offset = index;
         size_t relocation_size = (vec->size - index - 1) * sizeof(void*);
