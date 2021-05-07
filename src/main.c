@@ -6,6 +6,8 @@
 #include "BoxScene.h"
 #include "LightScene.h"
 #include "Camera.h"
+#include "utils/LightVector.h"
+#include "Light.h"
 
 GLFWwindow* create_window(void)
 {

@@ -1,15 +1,5 @@
 #pragma once
 #include <cglm/call.h>
-#include <assert.h>
-#include <string.h>
-
-#ifndef LIGHT_INTERNAL_MEMSET_INIT
-#define LIGHT_INTERNAL_MEMSET_INIT(LightType, TypeEnum) \
-    LightType light; \
-    memset(&light, 0, sizeof(LightType)); \
-    light.light_type = (TypeEnum); \
-    return light
-#endif
 
 enum ELightType
 {
@@ -19,74 +9,55 @@ enum ELightType
     LIGHT_TYPE_ENUM_LENGTH
 };
 
-// safe as long as ELightType is always a first member.
-inline enum ELightType light_get_type(void* light)
-{
-    enum ELightType* type = (enum ELightType*)(light);
-    assert(*type < LIGHT_TYPE_ENUM_LENGTH);
-    return *type;
-}
-
-
-
 // those structures are to be reflected in the shader.
+// Except for Attenuation params, which need to be included flatly in the shader.
 struct AttenuationParams
 {
-    float constant;
-    float linear;
-    float quadratic;
+    float att_constant;
+    float att_linear;
+    float att_quadratic;
+};
+
+struct LightColor
+{
+    vec3 ambient;
+    vec3 diffuse;
+    vec3 specular;
 };
 
 typedef struct Light
 {
     enum ELightType light_type;
     vec3 position;
-    vec3 ambient;
-    vec3 diffuse;
-    vec3 specular;
 
+    struct LightColor light_color;
     struct AttenuationParams att_params;
 } Light;
 
-typedef struct DirectionalLight
+typedef struct LightDirectional
 {
     enum ELightType light_type;
     vec3 direction;
-    vec3 ambient;
-    vec3 diffuse;
-    vec3 specular;
 
+    struct LightColor light_color;
     struct AttenuationParams att_params;
-} DirectionalLight;
+} LightDirectional;
 
-typedef struct SpotLight
+typedef struct LightSpotlight
 {
     enum ELightType light_type;
     vec3 position;
     vec3 direction;
 
-    vec3 ambient;
-    vec3 diffuse;
-    vec3 specular;
+    float inner_cone_cosine;
+    float outer_cone_cosine;
 
-    float cutoff_cosine;
-
+    struct LightColor light_color;
     struct AttenuationParams att_params;
-} SpotLight;
+} LightSpotlight;
 
-inline Light light_init()
-{
-    LIGHT_INTERNAL_MEMSET_INIT(Light, LIGHT_OMNIDIR);
-}
-
-inline DirectionalLight light_directional_init()
-{
-    LIGHT_INTERNAL_MEMSET_INIT(DirectionalLight, LIGHT_UNIDIR);
-}
-
-inline SpotLight light_spotlight_init()
-{
-    LIGHT_INTERNAL_MEMSET_INIT(SpotLight, LIGHT_SPOTLIGHT);
-}
-
-#undef LIGHT_INTERNAL_MEMSET_INIT
+// safe as long as ELightType is always a first member.
+enum ELightType light_get_type(void* light);
+Light light_init();
+LightDirectional light_directional_init();
+LightSpotlight light_spotlight_init();

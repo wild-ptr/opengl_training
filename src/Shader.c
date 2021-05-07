@@ -7,6 +7,7 @@
 #include <assert.h>
 #include "Shader.h"
 #include "Light.h"
+#include "utils/LightVector.h"
 
 
 static const int ERR_VALUE = INT_MAX;
@@ -204,15 +205,15 @@ void shader_set_light(Shader* shader, const Light* light, const char* uniform_na
 
     strcpy(buf, uniform_name);
     strcat(buf, ".ambient");
-    shader_setUniform3vec(shader, buf, light->ambient);
+    shader_setUniform3vec(shader, buf, light->light_color.ambient);
 
     strcpy(buf, uniform_name);
     strcat(buf, ".diffuse");
-    shader_setUniform3vec(shader, buf, light->diffuse);
+    shader_setUniform3vec(shader, buf, light->light_color.diffuse);
 
     strcpy(buf, uniform_name);
     strcat(buf, ".specular");
-    shader_setUniform3vec(shader, buf, light->specular);
+    shader_setUniform3vec(shader, buf, light->light_color.specular);
 }
 
 void shader_set_material(Shader* shader, const Material* material, const char* uniform_name, int offset)
@@ -248,3 +249,130 @@ void shader_set_material(Shader* shader, const Material* material, const char* u
     strcat(buf, ".shininess");
     shader_setUniformf(shader, buf, material->shininess);
 }
+
+#ifndef SHADER_INTERNAL_ITOA
+#define SHADER_INTERNAL_ITOA(bufferName, size, index) \
+    snprintf((bufferName), (size), "%lu", (index))
+#endif
+
+static void set_light_attenuation_params(
+    Shader* shader,
+    const struct AttenuationParams* params,
+    char* uniform_name)
+{
+    char buf[80];
+
+    snprintf(buf, 80, "%s.att_constant", uniform_name);
+    shader_setUniformf(shader, buf, params->att_constant);
+
+    snprintf(buf, 80, "%s.att_linear", uniform_name);
+    shader_setUniformf(shader, buf, params->att_linear);
+
+    snprintf(buf, 80, "%s.att_quadratic", uniform_name);
+    shader_setUniformf(shader, buf, params->att_quadratic);
+}
+
+static void set_light_color_vectors(
+    Shader* shader,
+    const struct LightColor* color,
+    char* uniform_name)
+{
+    char buf[80];
+    snprintf(buf, 80, "%s.ambient", uniform_name);
+    shader_setUniform3vec(shader, buf, color->ambient);
+
+    snprintf(buf, 80, "%s.diffuse", uniform_name);
+    shader_setUniform3vec(shader, buf, color->diffuse);
+
+    snprintf(buf, 80, "%s.specular", uniform_name);
+    shader_setUniform3vec(shader, buf, color->specular);
+}
+
+static void set_directional_light(Shader* shader, const LightDirectional* light, size_t index)
+{
+    char buf[80];
+
+    char strindex[30];
+    SHADER_INTERNAL_ITOA(strindex, 30, index);
+
+    snprintf(buf, 80, "dirLights[%s].direction", strindex);
+    shader_setUniform3vec(shader, buf, light->direction);
+
+    snprintf(buf, 80, "dirLights[%s]", strindex);
+    set_light_color_vectors(shader, &light->light_color, buf);
+    set_light_attenuation_params(shader, &light->att_params, buf);
+}
+
+static void set_omni_light(Shader* shader, const Light* light, size_t index)
+{
+    char buf[80];
+
+    char strindex[30];
+    SHADER_INTERNAL_ITOA(strindex, 30, index);
+
+    snprintf(buf, 80, "omniLights[%s].direction", strindex);
+    shader_setUniform3vec(shader, buf, light->position);
+
+    snprintf(buf, 80, "omniLights[%s]", strindex);
+    set_light_color_vectors(shader, &light->light_color, buf);
+    set_light_attenuation_params(shader, &light->att_params, buf);
+}
+
+static void set_spot_light(Shader* shader, const LightSpotlight* light, size_t index)
+{
+    char buf[80];
+
+    char strindex[15];
+    SHADER_INTERNAL_ITOA(strindex, 15, index);
+
+    snprintf(buf, 80, "spotLights[%s].direction", strindex);
+    shader_setUniform3vec(shader, buf, light->direction);
+
+    snprintf(buf, 80, "spotLights[%s].position", strindex);
+    shader_setUniform3vec(shader, buf, light->position);
+
+    snprintf(buf, 80, "spotLights[%s].inner_cone_cosine", strindex);
+    shader_setUniformf(shader, buf, light->inner_cone_cosine);
+
+    snprintf(buf, 80, "spotLights[%s].outer_cone_cosine", strindex);
+    shader_setUniformf(shader, buf, light->outer_cone_cosine);
+
+    snprintf(buf, 80, "spotLights[%s]", strindex);
+    set_light_color_vectors(shader, &light->light_color, buf);
+    set_light_attenuation_params(shader, &light->att_params, buf);
+}
+
+void shader_set_lights(Shader* shader, const LightVector* vec)
+{
+    size_t dir_lights_index = 0;
+    size_t omni_lights_index = 0;
+    size_t spotlight_lights_index = 0;
+
+    LV_FOR_EACH(*vec, i)
+    {
+        void* light = LV_AT(*vec, i);
+        enum ELightType type = light_get_type(light);
+
+        // small visitor-type dispatch
+        if(type == LIGHT_UNIDIR)
+        {
+            LightDirectional* dirlight = light;
+            set_directional_light(shader, light, dir_lights_index++);
+            continue;
+        }
+        if(type == LIGHT_OMNIDIR)
+        {
+            Light* dirlight = light;
+            set_omni_light(shader, light, omni_lights_index++);
+            continue;
+        }
+        if(type == LIGHT_SPOTLIGHT)
+        {
+            LightSpotlight* spotlight = light;
+            set_spot_light(shader, light, spotlight_lights_index++);
+            continue;
+        }
+    }
+}
+
+#undef SHADER_INTERNAL_ITOA

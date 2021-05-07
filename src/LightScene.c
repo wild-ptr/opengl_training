@@ -61,13 +61,14 @@ static vec3 cube_positions[] = {
 };
 
 
-static Light light = {
-    .ambient = {0.15, 0.15, 0.15},
-    .diffuse = {0.6, 0.6, 0.6},
-    .specular = {0.5, 0.5, 0.5}
-    // . position uninitialized
+static Light light =
+{
+    .light_color = {
+        .ambient = {0.15, 0.15, 0.15},
+        .diffuse = {0.6, 0.6, 0.6},
+        .specular = {0.5, 0.5, 0.5}
+    }
 };
-
 typedef struct UniformData
 {
     vec3 position;
