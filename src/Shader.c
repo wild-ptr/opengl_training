@@ -77,33 +77,57 @@ static unsigned int compileShader(const char* v_shader_source, int shader_type)
 bool shader_init(Shader* shader, const char* v_shader_path, const char* frag_shader_path)
 {
     bool ret;
-    char* v_shader_str = dumpFileContent(v_shader_path);
-    char* frag_shader_str = dumpFileContent(frag_shader_path);
+    char* v_shader_str = NULL;
+    char* frag_shader_str = NULL;
+
+    if(v_shader_path)
+        v_shader_str = dumpFileContent(v_shader_path);
+    if(frag_shader_path)
+        frag_shader_str = dumpFileContent(frag_shader_path);
 
     ret = shader_init_from_sources(shader, v_shader_str, frag_shader_str);
 
-    free(v_shader_str);
-    free(frag_shader_str);
+    if(v_shader_str)
+        free(v_shader_str);
+
+    if(frag_shader_path)
+        free(frag_shader_str);
+
     return ret;
 }
 
 bool shader_init_from_sources(Shader* shader, const char* v_shader_str, const char* frag_shader_str)
 {
     bool ret;
+    int v_shader, frag_shader;
     shader->valid = false;
 
-    int v_shader = compileShader(v_shader_str, GL_VERTEX_SHADER);
-    int frag_shader = compileShader(frag_shader_str, GL_FRAGMENT_SHADER);
-
-    if ((v_shader == ERR_VALUE) || (frag_shader == ERR_VALUE))
+    if(v_shader_str)
     {
-        ret = false;
-        goto cleanup;
+        v_shader = compileShader(v_shader_str, GL_VERTEX_SHADER);
+        if(v_shader == ERR_VALUE)
+        {
+            ret = false;
+            goto cleanup;
+        }
+    }
+
+    if(frag_shader_str)
+    {
+        frag_shader = compileShader(frag_shader_str, GL_FRAGMENT_SHADER);
+        if(frag_shader == ERR_VALUE)
+        {
+            ret = false;
+            goto cleanup;
+        }
     }
 
     shader->id = glCreateProgram();
-    glAttachShader(shader->id, v_shader);
-    glAttachShader(shader->id, frag_shader);
+    if(v_shader_str)
+        glAttachShader(shader->id, v_shader);
+    if(frag_shader_str)
+        glAttachShader(shader->id, frag_shader);
+
     glLinkProgram(shader->id);
 
     if (!checkShaderLinkStatus(shader->id))
@@ -116,8 +140,10 @@ bool shader_init_from_sources(Shader* shader, const char* v_shader_str, const ch
     shader->valid = true;
 
 cleanup:
-    glDeleteShader(v_shader);
-    glDeleteShader(frag_shader);
+    if(v_shader_str)
+        glDeleteShader(v_shader);
+    if(frag_shader_str)
+        glDeleteShader(frag_shader);
     return ret;
 }
 

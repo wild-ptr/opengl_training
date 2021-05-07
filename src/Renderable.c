@@ -35,6 +35,20 @@ static unsigned int createAndBindEbo()
     return EBO;
 }
 
+static void renderable_init(Renderable* renderable)
+{
+    renderable->VAO = 0;
+    renderable->VBO = 0;
+    renderable->EBO = 0;
+    renderable->materials = NULL;
+    renderable->num_materials = 0;
+    renderable->num_indices = 0;
+    renderable->num_vertices = 0;
+    renderable->shader = NULL;
+    renderable->valid = false;
+    renderable->indexed = false;
+}
+
 void renderable_bind(Renderable* r)
 {
     if(r->valid)
@@ -88,9 +102,15 @@ void renderable_create(Renderable* renderable,
     }
 
     renderable->shader = malloc(sizeof(shader));
-    *renderable->shader = *shader;
+    if (shader != NULL)
+        *renderable->shader = *shader;
 
     renderable->valid = true;
+}
+
+void renderable_shader_rebind(Renderable* r, Shader* s)
+{
+    *r->shader = *s;
 }
 
 void renderable_free(Renderable* r)
@@ -113,6 +133,8 @@ void renderable_draw(Renderable* renderable)
     glBindVertexArray(renderable->VAO);
     glBindBuffer(GL_ARRAY_BUFFER, renderable->VBO); // possibly not needed.
 
+    shader_use(renderable->shader);
+
     for(int i = 0; i < renderable->num_materials; ++i)
     {
         char buf[70];
@@ -123,7 +145,6 @@ void renderable_draw(Renderable* renderable)
         shader_set_material(renderable->shader, &renderable->materials[i], buf, i*3);
     }
 
-    shader_use(renderable->shader);
     shader_calculate_uniforms(renderable->shader);
 
     if(renderable->indexed)
@@ -138,16 +159,3 @@ void renderable_draw(Renderable* renderable)
     }
 }
 
-void renderable_init(Renderable* renderable)
-{
-    renderable->VAO = 0;
-    renderable->VBO = 0;
-    renderable->EBO = 0;
-    renderable->materials = NULL;
-    renderable->num_materials = 0;
-    renderable->num_indices = 0;
-    renderable->num_vertices = 0;
-    renderable->shader = NULL;
-    renderable->valid = false;
-    renderable->indexed = false;
-}

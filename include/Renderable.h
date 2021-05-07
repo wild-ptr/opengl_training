@@ -23,8 +23,8 @@ typedef struct Renderable
 } Renderable;
 
 
-void renderable_init(Renderable* renderable);
-
+//void renderable_init(Renderable* renderable);
+void renderable_free(Renderable*);
 void renderable_create(Renderable* renderable,
                        renderable_bind_attributes_fp bind_fp,
                        float vertices[static 1],
@@ -41,5 +41,5 @@ void renderable_up_shader_uni_data(Renderable* renderable,
                                    void* uniform_calc_data);
 
 void renderable_bind(Renderable*);
+void renderable_shader_rebind(Renderable* r, Shader* s);
 
-void renderable_free(Renderable*);
