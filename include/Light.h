@@ -25,6 +25,10 @@ struct LightColor
     vec3 specular;
 };
 
+//typedef void(*omni_light_clbk)(Light*);
+//typedef void(*dir_light_clbk)(LightDirectional*);
+//typedef void(*spot_light_clbk)(LightSpotlight*);
+
 typedef struct Light
 {
     enum ELightType light_type;

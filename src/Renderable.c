@@ -131,7 +131,7 @@ void renderable_up_shader_uni_data(Renderable* renderable, void* uniform_calc_da
 void renderable_draw(Renderable* renderable)
 {
     glBindVertexArray(renderable->VAO);
-    glBindBuffer(GL_ARRAY_BUFFER, renderable->VBO); // possibly not needed.
+    //glBindBuffer(GL_ARRAY_BUFFER, renderable->VBO); // possibly not needed.
 
     shader_use(renderable->shader);
 

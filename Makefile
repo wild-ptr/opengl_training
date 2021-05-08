@@ -22,7 +22,8 @@ OBJECTS = $(SOURCES:$(SRC_PATH)/%.$(SRC_EXT)=$(BUILD_PATH)/%.o)
 DEPS = $(OBJECTS:.o=.d)
 
 # flags # add -flto later
-COMPILE_FLAGS = -std=gnu11 -Wall -Wextra -g -O3 -fopenmp -fuse-ld=gold
+COMPILE_FLAGS = -std=gnu11 -Wall -Wextra -O3 -fopenmp -fuse-ld=gold
+COMPILE_FLAGS_DEBUG = -std=gnu11 -Wall -Wextra -g -O0 -fopenmp -fuse-ld=gold
 INCLUDES = -I include/ -I /usr/local/include
 # Space-separated pkg-config libraries used by this project
 LIBS = lcglm 
@@ -35,6 +36,11 @@ default_target: release
 .PHONY: release
 release: export CCFLAGS := $(CCFLAGS) $(COMPILE_FLAGS)
 release: dirs
+	@$(MAKE) all
+
+.PHONY: debug
+debug: export CCFLAGS := $(CCFLAGS) $(COMPILE_FLAGS_DEBUG)
+debug: dirs
 	@$(MAKE) all
 
 .PHONY: dirs

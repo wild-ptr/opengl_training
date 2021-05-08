@@ -67,7 +67,7 @@ static unsigned int compileShader(const char* v_shader_source, int shader_type)
 {
     unsigned int shader_obj;
     shader_obj = glCreateShader(shader_type);
-    printf("%s:\n%s\n\n", __FUNCTION__, v_shader_source);
+    //printf("%s:\n%s\n\n", __FUNCTION__, v_shader_source);
     glShaderSource(shader_obj, 1, &v_shader_source, NULL);
     glCompileShader(shader_obj);
 
@@ -336,7 +336,7 @@ static void set_omni_light(Shader* shader, const Light* light, size_t index)
     char strindex[30];
     SHADER_INTERNAL_ITOA(strindex, 30, index);
 
-    snprintf(buf, 80, "omniLights[%s].direction", strindex);
+    snprintf(buf, 80, "omniLights[%s].position", strindex);
     shader_setUniform3vec(shader, buf, light->position);
 
     snprintf(buf, 80, "omniLights[%s]", strindex);
@@ -382,6 +382,7 @@ void shader_set_lights(Shader* shader, const LightVector* vec)
         // Almost like std::visit! Almost.
         if(type == LIGHT_UNIDIR)
         {
+            printf("Setting dir light\n");
             set_directional_light(shader, light, dir_lights_index++);
             continue;
         }

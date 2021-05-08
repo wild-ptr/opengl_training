@@ -4,7 +4,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "BoxScene.h"
-#include "LightScene.h"
+#include "DeferredScene.h"
 #include "Camera.h"
 #include "utils/LightVector.h"
 #include "Light.h"
@@ -89,7 +89,8 @@ int main(void)
         process_input(window, &camera);
 
         //drawBoxScene(&camera);
-        drawLightScene(&camera);
+        //drawLightScene(&camera);
+        drawDeferredScene(&camera);
 
         glfwSwapBuffers(window);
         glfwPollEvents();

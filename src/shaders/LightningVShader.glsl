@@ -9,7 +9,7 @@ uniform mat4 proj_m;
 uniform mat3 norm_m;
 
 out vec3 Norm;
-out vec3 FragPosViewS;
+out vec3 FragPos_world;
 out vec2 texCoords;
 
 void main()
@@ -20,6 +20,6 @@ void main()
     // should be done on CPU and passed as uniform.
     //Norm = mat3(transpose(inverse(model_m))) * norm;
     Norm = norm_m * norm;
-    FragPosViewS = (model_m * vec4(pos, 1.0)).xyz;
+    FragPos_world = (model_m * vec4(pos, 1.0)).xyz;
     texCoords = aTexCoords;
 }
