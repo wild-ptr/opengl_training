@@ -43,9 +43,13 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height)
     glViewport(0, 0, width, height);
 }
 
-void process_input(GLFWwindow* window, Camera* cam)
+void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
 {
-    float speed = cam->cam_speed * cam->time_d;
+    deferred_scene_specific_input_callback(key, action);
+}
+
+void process_cam_input(GLFWwindow* window, Camera* cam)
+{
     if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
         camera_move(cam, CAMERA_FORWARD);
 
@@ -57,6 +61,7 @@ void process_input(GLFWwindow* window, Camera* cam)
 
     if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
         camera_move(cam, CAMERA_RIGHT);
+
 }
 
 int main(void)
@@ -77,8 +82,10 @@ int main(void)
     camera.pos_v[2] = 5.0f; // (0,0,3) position
     camera.dir_v[2] = -1.0f; // (0,0,-1) direction (opposite of where its looking)
     camera.up_v[1] = 1.0f; // (0,1,0) up v of world space;
+
     glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
     glfwSetCursorPosCallback(window, camera_move_direction_clbk);
+    glfwSetKeyCallback(window, key_callback);
 
     float lastframe = 0;
     float currentframe = 0;
@@ -86,10 +93,8 @@ int main(void)
     {
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        process_input(window, &camera);
+        process_cam_input(window, &camera);
 
-        //drawBoxScene(&camera);
-        //drawLightScene(&camera);
         drawDeferredScene(&camera);
 
         glfwSwapBuffers(window);
