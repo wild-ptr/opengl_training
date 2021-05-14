@@ -28,7 +28,7 @@ INCLUDES = -I include/ -I /usr/local/include
 # Space-separated pkg-config libraries used by this project
 LIBS = lcglm 
 LINKER_FLAGS = -lpthread -lX11 -lglfw -lGL -lXrandr -lXi -ldl -lXinerama -lXcursor \
-			   -lrt -lxcb -lXau -lXdmcp -lm -lcglm
+			   -lrt -lxcb -lXau -lXdmcp -lm -lcglm -lassimp
 
 .PHONY: default_target
 default_target: release

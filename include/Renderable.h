@@ -15,8 +15,8 @@ typedef struct Renderable
     unsigned int EBO;
     Material* materials;
     int num_materials;
-    int num_indices;
-    int num_vertices;
+    size_t num_indices;
+    size_t num_vertices;
     Shader* shader;
     bool valid;
     bool indexed;
@@ -35,7 +35,19 @@ void renderable_create(Renderable* renderable,
                        size_t materials_size,
                        const Shader* shader); // deep copied
 
+void renderable_create_from_vao_vbo(Renderable* r,
+                       renderable_bind_attributes_fp bind_fp,
+                       int VAO,
+                       int VBO,
+                       int num_of_vertices,
+                       unsigned int indices[],
+                       size_t indices_size,
+                       Material* materials,
+                       size_t materials_size,
+                       Shader* shader);
+
 void renderable_draw(Renderable* renderable);
+void renderable_draw_with_shader(Renderable* renderable, Shader* shader);
 
 void renderable_up_shader_uni_data(Renderable* renderable,
                                    void* uniform_calc_data);

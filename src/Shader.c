@@ -198,7 +198,7 @@ void shader_setUniform3vec(Shader* shader, const char* name, const float value[]
 void shader_update_uniform_calc_data(Shader* shader, void* uniform_calc_data)
 {
     shader->uniform_calc_data = uniform_calc_data;
-    shader_calculate_uniforms(shader);
+    //shader_calculate_uniforms(shader);
 }
 
 void shader_calculate_uniforms(Shader* shader)

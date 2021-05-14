@@ -16,6 +16,22 @@ Material* material_init(Material* material,
     return material;
 }
 
+Material* material_init_s(Material* material,
+                        const char* path,
+                        const char* path_specular,
+                        const char* path_norm)
+{
+    if(path)
+        texture_init(&material->diffuse_map, path);
+    if(path_specular)
+        texture_init(&material->specular_map, path_specular);
+    if(path_norm)
+        texture_init(&material->normal_map, path_norm);
+
+    return material;
+}
+
+
 void material_use(Material* mat, unsigned int texunit_offset)
 {
     // those accept invalid textures as noop, no need to check.
@@ -23,3 +39,5 @@ void material_use(Material* mat, unsigned int texunit_offset)
     texture_use_texunit(&mat->specular_map, GL_TEXTURE0 + texunit_offset + 1);
     texture_use_texunit(&mat->normal_map, GL_TEXTURE0 + texunit_offset + 2);
 }
+
+

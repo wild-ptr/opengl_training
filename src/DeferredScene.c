@@ -11,6 +11,7 @@
 #include "Camera.h"
 #include "GBuffer.h"
 #include "utils/LightVector.h"
+#include "Model.h"
 
 static float vertices[] = {
     // positions          // normals           // texture coords
@@ -86,7 +87,7 @@ static void mvp_transform(Shader* shader, const UniformData* data)
     mat4 model_m = GLM_MAT4_IDENTITY_INIT;
     glmc_translate(model_m, data->position);
 	glmc_scale(model_m, data->scaleFactor);
-    glmc_rotate(model_m, glfwGetTime(), (vec3){1.0f, 0.0f, 0.0f});
+    //glmc_rotate(model_m, 3*glfwGetTime(), (vec3){0.0f, 1.0f, 0.0f});
 
     // normal transform matrix
     mat3 norm_m;
@@ -257,7 +258,7 @@ static void update_flashlight_pos_to_cam(Camera* camera, LightSpotlight* flashli
 
 static void update_orb_light_and_src_pos(SceneLights* lights, UniformData* data_src)
 {
-    const float radius = 3.0f;
+    const float radius = 7.0f;
     const float camX = sin(glfwGetTime()) * radius;
     const float camZ = cos(glfwGetTime()) * radius;
 
@@ -297,7 +298,8 @@ void drawDeferredScene(Camera* camera)
     static Shader light_target_shader;
 
     static UniformData data_src = {.scaleFactor = {0.5, 0.5, 0.5}};
-	static UniformData data_target = {.scaleFactor = {1.5, 1.5, 1.5}};
+	static UniformData data_target = {.scaleFactor = {1.0, 1.0, 1.0}};
+    static Model backpack = {};
 
     // statics init
     CALL_ONCE
@@ -310,11 +312,22 @@ void drawDeferredScene(Camera* camera)
             NULL);
 
 		src = create_light_source();
+
         for(int i = 0; i < 10; ++i)
 		    targets[i] = create_light_target(&light_target_shader);
 
         gbuffer_init(&gbuffer, 1500, 1200);
         lights = create_lights();
+
+        model_load(&backpack, "assets/backpack/backpack.obj", NULL);
+        model_bind_shader(&backpack, &light_target_shader);
+
+        // ugly hack untill i fix the loader.
+        for(int i = 0; i < backpack.meshes_size; ++i)
+        {
+            backpack.meshes[i].materials[0].shininess = 32;
+        }
+
         CALL_ONCE_END;
     }
 
@@ -324,15 +337,20 @@ void drawDeferredScene(Camera* camera)
     update_flashlight_pos_to_cam(camera, lights.flashlight);
     update_orb_light_and_src_pos(&lights, &data_src);
 
+    // lights are set on uniform basis and shaderid
     shader_set_lights(&light_target_shader, &lights.lv);
 
     for(int i = 0; i < 10; ++i)
     {
         memcpy(data_target.position, &cube_positions[i], sizeof(vec3));
         renderable_up_shader_uni_data(&targets[i], &data_target);
-        renderable_draw(&targets[i]);
+        //renderable_draw(&targets[i]);
     }
 
     renderable_up_shader_uni_data(&src, &data_src);
     renderable_draw(&src);
+
+    model_bind_shader_data(&backpack, &data_target);
+    model_draw(&backpack);
 }
+

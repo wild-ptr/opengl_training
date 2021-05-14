@@ -38,8 +38,8 @@ struct SpotLight
     float outer_cone_cosine;
 };
 
-in vec3 Norm;
 in vec3 FragPos_world;
+in mat3 TBN;
 in vec2 texCoords;
 out vec4 FragColor;
   
@@ -102,7 +102,7 @@ vec3 calculateSpotLights(vec3 fragmentNormal, vec3 diffuseColor, vec3 specularFa
         // first, we need to determine whether the fragment is in the light cone, or not.
         vec3 normal_light_dir = normalize(-spotLights[i].direction);
         vec3 frag_light_dir = normalize(spotLights[i].position - FragPos_world);
-        float theta = dot(frag_light_dir, normal_light_dir);
+        float theta = max(dot(frag_light_dir, normal_light_dir), 0);
 
         if(theta > spotLights[i].outer_cone_cosine) // if it holds, it is in cone.
         {
@@ -147,16 +147,11 @@ void main()
     vec3 specularFactor = vec3(texture(material_0.specular, texCoords));
     vec3 normalMap = vec3(texture(material_0.normal, texCoords));
 
-    // emission map
-    vec3 emissionColor = vec3(0.0);
-    if (specularFactor == vec3(0.0))
-    {
-        emissionColor = vec3(texture(material_1.diffuse, texCoords + vec2(0.0, time)));
-        emissionColor *= 0.5;
-    }
+    normalMap = normalize(normalMap * 2.0 - 1.0);
+    vec3 normal = (TBN * normalMap);
     
-    vec3 omniComponent = calculateOmniLights(Norm, diffuseColor, specularFactor, material_0.shininess);
-    vec3 spotComponent = calculateSpotLights(Norm, diffuseColor, specularFactor, material_0.shininess);
+    vec3 omniComponent = calculateOmniLights(normal, diffuseColor, specularFactor, material_0.shininess);
+    vec3 spotComponent = calculateSpotLights(normal, diffuseColor, specularFactor, material_0.shininess);
 
-	FragColor = vec4((omniComponent + emissionColor + spotComponent), 1.0f);
+	FragColor = vec4((omniComponent + spotComponent), 1.0f);
 }
